@@ -98,16 +98,7 @@ export default function Pocetna() {
 
                 <div className="crm-divider" />
 
-                <div className="crm-gallery-preview">
-                  <div className="crm-row-title">Galerija nekretnine</div>
-                  <div className="crm-thumbs">
-                    <div className="crm-thumb a" />
-                    <div className="crm-thumb b" />
-                    <div className="crm-thumb c" />
-                    <div className="crm-thumb d" />
-                  </div>
-                 
-                </div>
+                
               </div>
             </div>
 

@@ -6,10 +6,12 @@ import Login from './pages/Login';
 import AgentDashboard from './pages/AgentDashboard';
 import KupciTable from './pages/KupciTable';
 import NekretnineTable from './pages/NekretnineTable';
+import NavBar from './components/NavBar';
 
 function App() {
   return (
     <BrowserRouter>
+    <NavBar />
      <Routes>
        <Route path="/" element={<Pocetna />} />
       <Route path="/login" element={<Login />} />

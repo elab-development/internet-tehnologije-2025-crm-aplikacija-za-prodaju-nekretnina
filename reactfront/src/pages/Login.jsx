@@ -54,7 +54,7 @@ export default function Login() {
 
       localStorage.setItem("auth_token", token);
         localStorage.setItem("auth_user", JSON.stringify(user));
-
+        window.dispatchEvent(new Event("auth:changed")); 
         /* REDIRECT PO ULOZI */
         if (user.uloga === "administrator") {
         navigate("/admin");
