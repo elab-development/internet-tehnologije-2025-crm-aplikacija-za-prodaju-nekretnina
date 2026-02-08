@@ -35,12 +35,10 @@ export default function Pocetna() {
             </p>
 
             <div className="crm-hero-actions">
-              <a className="crm-btn crm-btn-primary" href="#cta">
-                Prijava / Početak <FiArrowRight />
+              <a className="crm-btn crm-btn-primary" href="login">
+                Prijava  <FiArrowRight />
               </a>
-              <a className="crm-btn crm-btn-ghost" href="#moduli">
-                Pogledaj module
-              </a>
+              
             </div>
 
             <div className="crm-trust">
