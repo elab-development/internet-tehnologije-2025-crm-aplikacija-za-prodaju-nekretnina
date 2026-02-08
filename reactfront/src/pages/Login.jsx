@@ -167,14 +167,14 @@ export default function Login() {
                     {loading ? "Prijava..." : <>Prijavi se <FiArrowRight /></>}
                   </button>
 
-                  <div className="login-foot">
+                  {/* <div className="login-foot">
                     <span className="login-muted">
                       Nemaš nalog?
                     </span>{" "}
                     <Link to="/register" className="login-link">
                       Registracija
                     </Link>
-                  </div>
+                  </div> */}
                 </form>
               </div>
             </div>

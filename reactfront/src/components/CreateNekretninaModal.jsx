@@ -28,12 +28,11 @@ const ATTR_TYPES = [
   { type: "lokacija", label: "Lokacija", iconKey: "FiMapPin", Comp: FiMapPin },
   { type: "uselivo", label: "Useljivo", iconKey: "FiKey", Comp: FiKey },
 
-  // ✅ DODATO: da addAttr ne puca + da postoji u select-u
+  // da addAttr ne puca + postoji u select-u
   { type: "tip_objekta", label: "Tip objekta", iconKey: "FiHome", Comp: FiHome },
 ];
 
 function uid() {
-  // dovoljno za key u UI
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
@@ -99,8 +98,7 @@ export default function CreateNekretninaModal({
         if (a.id !== id) return a;
 
         const currentTypeLabel = typeMap[a.type]?.label || "";
-        const shouldAutofillName =
-          !a.naziv?.trim() || a.naziv.trim() === currentTypeLabel;
+        const shouldAutofillName = !a.naziv?.trim() || a.naziv.trim() === currentTypeLabel;
 
         return {
           ...a,
@@ -113,18 +111,10 @@ export default function CreateNekretninaModal({
   }
 
   function addAttr() {
-    // ✅ FIX: "tip_objekta" sada postoji, plus fallback za svaki slučaj
     const picked = typeMap["tip_objekta"] || typeMap["kvadratura"];
-
     setAttrs((prev) => [
       ...prev,
-      {
-        id: uid(),
-        type: picked.type,
-        icon: picked.iconKey,
-        naziv: picked.label, // default naziv da ne ostane prazno
-        vrednost: "",
-      },
+      { id: uid(), type: picked.type, icon: picked.iconKey, naziv: picked.label, vrednost: "" },
     ]);
   }
 
@@ -140,7 +130,7 @@ export default function CreateNekretninaModal({
         icon: (a.icon || "FiHome").toString(),
         naziv: (a.naziv || "").trim(),
         vrednost: (a.vrednost || "").trim(),
-        // ako ti treba i tip na backendu, otkomentariši:
+        // Ako ti treba i tip na backendu:
         // type: (a.type || "").toString(),
       }))
       .filter((a) => a.naziv !== "" || a.vrednost !== "");
@@ -160,13 +150,7 @@ export default function CreateNekretninaModal({
         <div className="nek-modal-top">
           <div className="nek-modal-title">Nova nekretnina</div>
 
-          <button
-            className="nek-iconbtn"
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            title="Zatvori"
-          >
+          <button className="nek-iconbtn" type="button" onClick={onClose} disabled={loading} title="Zatvori">
             <FiX />
           </button>
         </div>
@@ -187,9 +171,7 @@ export default function CreateNekretninaModal({
                 onChange={(e) => setForm((f) => ({ ...f, adresa: e.target.value }))}
                 placeholder="npr. Bulevar kralja Aleksandra 12"
               />
-              {fieldErrors?.adresa ? (
-                <div className="nek-field-error">{fieldErrors.adresa}</div>
-              ) : null}
+              {fieldErrors?.adresa ? <div className="nek-field-error">{fieldErrors.adresa}</div> : null}
             </label>
 
             <div className="nek-grid2">
@@ -230,9 +212,7 @@ export default function CreateNekretninaModal({
                 placeholder="npr. 125000"
                 inputMode="numeric"
               />
-              {fieldErrors?.cena ? (
-                <div className="nek-field-error">{fieldErrors.cena}</div>
-              ) : null}
+              {fieldErrors?.cena ? <div className="nek-field-error">{fieldErrors.cena}</div> : null}
             </label>
 
             {/* ATRIBUTI */}
@@ -250,7 +230,6 @@ export default function CreateNekretninaModal({
 
                   return (
                     <div className="nek-attr-row" key={a.id}>
-                      {/* TIP (izbor) + ikonica (auto) */}
                       <div className="nek-attr-col">
                         <span className="nek-attr-label">Atribut</span>
 
@@ -259,11 +238,7 @@ export default function CreateNekretninaModal({
                             <IconComp />
                           </span>
 
-                          <select
-                            className="nek-input"
-                            value={a.type}
-                            onChange={(e) => changeAttrType(a.id, e.target.value)}
-                          >
+                          <select className="nek-input" value={a.type} onChange={(e) => changeAttrType(a.id, e.target.value)}>
                             {ATTR_TYPES.map((opt) => (
                               <option key={opt.type} value={opt.type}>
                                 {opt.label}
@@ -307,9 +282,7 @@ export default function CreateNekretninaModal({
                 })}
               </div>
 
-              <div className="nek-attrs-hint">
-                Unesi npr. kvadraturu, sprat, grejanje… Prazne stavke se ne čuvaju.
-              </div>
+              <div className="nek-attrs-hint">Unesi npr. kvadraturu, sprat, grejanje… Prazne stavke se ne čuvaju.</div>
             </div>
 
             <div className="nek-form-actions">
@@ -317,13 +290,7 @@ export default function CreateNekretninaModal({
                 Otkaži
               </button>
               <button className="nek-btn primary" type="submit" disabled={loading}>
-                {loading ? (
-                  "Čuvanje..."
-                ) : (
-                  <>
-                    Sačuvaj <FiSave />
-                  </>
-                )}
+                {loading ? "Čuvanje..." : <>Sačuvaj <FiSave /></>}
               </button>
             </div>
           </form>
