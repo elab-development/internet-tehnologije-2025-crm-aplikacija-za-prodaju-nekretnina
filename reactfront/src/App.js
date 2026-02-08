@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import AgentDashboard from './pages/AgentDashboard';
 import KupciTable from './pages/KupciTable';
+import NekretnineTable from './pages/NekretnineTable';
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/agent" element={<AgentDashboard />} />
       <Route path="/kupci" element={<KupciTable />} />
-
+      <Route path="/nekretnine" element={<NekretnineTable />} />
 
       
     </Routes>

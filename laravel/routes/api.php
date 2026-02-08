@@ -11,6 +11,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // PUBLIC (ako želiš da svako može da vidi oglase)
+Route::get('/nekretnine/search', [NekretninaController::class, 'search']);
 Route::get('/nekretnine', [NekretninaController::class, 'index']);
 Route::get('/nekretnine/{id}', [NekretninaController::class, 'show']);
 

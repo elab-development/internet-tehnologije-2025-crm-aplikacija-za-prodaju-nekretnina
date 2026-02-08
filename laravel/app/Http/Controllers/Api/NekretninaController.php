@@ -107,4 +107,69 @@ class NekretninaController extends Controller
             'message' => 'Nekretnina obrisana'
         ]);
     }
+
+
+
+    // GET /api/nekretnine/search?q=...&page=1&per_page=10&sort_by=adresa&sort_dir=asc&status=dostupna&tip=stan
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'q' => 'nullable|string|max:150',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+
+            'status' => 'nullable|string|max:50',
+            'tip' => 'nullable|string|max:80',
+
+            'sort_by' => 'nullable|in:adresa,tip,cena,status,created_at',
+            'sort_dir' => 'nullable|in:asc,desc',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+        $tip = trim((string) $request->get('tip', ''));
+
+        $perPage = (int) $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+
+        $query = Nekretnina::query();
+
+        if ($q !== '') {
+            $query->where(function ($qq) use ($q) {
+                $qq->where('adresa', 'like', "%{$q}%")
+                ->orWhere('tip', 'like', "%{$q}%")
+                ->orWhere('status', 'like', "%{$q}%");
+
+                // ako želiš da pretražuje i JSON (atributi), može ovako (MySQL):
+                // ->orWhere('atributi', 'like', "%{$q}%");
+            });
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($tip !== '') {
+            $query->where('tip', $tip);
+        }
+
+        $result = $query
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage);
+
+        return response()->json($result);
+    }
+
+
+
+
+
+
 }
