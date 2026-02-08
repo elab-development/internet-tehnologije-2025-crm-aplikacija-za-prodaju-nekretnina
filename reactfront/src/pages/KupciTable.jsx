@@ -1,3 +1,5 @@
+// src/pages/KupciTable.jsx  (ili gde god ti stoji)
+// OBAVEZNO: importuj modal iz components foldera
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "./KupciTable.css";
@@ -8,7 +10,10 @@ import {
   FiChevronRight,
   FiRefreshCw,
   FiTrash2,
+  FiPlus,
 } from "react-icons/fi";
+
+import CreateKupacModal from "../components/CreateKupacModal";
 
 const SORTABLE = [
   { key: "ime", label: "Ime" },
@@ -34,6 +39,19 @@ function useDebouncedValue(value, delay = 350) {
   return deb;
 }
 
+function normalizeErrors(payload) {
+  const errs = {};
+  if (payload?.errors) {
+    for (const key of Object.keys(payload.errors)) {
+      const msg = Array.isArray(payload.errors[key])
+        ? payload.errors[key][0]
+        : String(payload.errors[key]);
+      errs[key] = msg;
+    }
+  }
+  return errs;
+}
+
 export default function KupciTable() {
   const [q, setQ] = useState("");
   const dq = useDebouncedValue(q, 350);
@@ -51,6 +69,12 @@ export default function KupciTable() {
 
   // brisanje
   const [deletingId, setDeletingId] = useState(null);
+
+  // create modal state
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const sortLabel = useMemo(() => {
     const f = SORTABLE.find((x) => x.key === sortBy);
@@ -124,7 +148,6 @@ export default function KupciTable() {
     try {
       await api.delete(`/kupci/${id}`);
 
-      // ako obrišeš poslednji na strani, vrati stranu unazad
       const willBeEmpty = rows.length === 1 && (meta?.current_page ?? page) > 1;
       if (willBeEmpty) setPage((p) => Math.max(1, p - 1));
       else await fetchData();
@@ -132,6 +155,71 @@ export default function KupciTable() {
       setErr("Greška pri brisanju kupca.");
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  function openCreate() {
+    setCreateError("");
+    setFieldErrors({});
+    setIsCreateOpen(true);
+  }
+
+  function closeCreate() {
+    if (createLoading) return;
+    setIsCreateOpen(false);
+  }
+
+  async function handleCreate(payloadFromModal) {
+    setCreateError("");
+    setFieldErrors({});
+
+    // FE validacija (po backend pravilima)
+    const fe = {};
+    if (!payloadFromModal.ime?.trim()) fe.ime = "Unesi ime.";
+    if (!payloadFromModal.prezime?.trim()) fe.prezime = "Unesi prezime.";
+
+    const email = (payloadFromModal.email || "").trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fe.email = "Email nije validan.";
+
+    const budzetRaw = payloadFromModal.budzet;
+    if (budzetRaw !== "" && budzetRaw !== null && budzetRaw !== undefined) {
+      if (Number.isNaN(Number(budzetRaw))) fe.budzet = "Budžet mora biti broj.";
+    }
+
+    if (Object.keys(fe).length) {
+      setFieldErrors(fe);
+      return;
+    }
+
+    setCreateLoading(true);
+    try {
+      const payload = {
+        ime: payloadFromModal.ime.trim(),
+        prezime: payloadFromModal.prezime.trim(),
+        telefon: payloadFromModal.telefon?.trim() || null,
+        email: email || null,
+        budzet: budzetRaw === "" || budzetRaw === null || budzetRaw === undefined ? null : Number(budzetRaw),
+        lokacija: payloadFromModal.lokacija?.trim() || null,
+        napomena: payloadFromModal.napomena?.trim() || null,
+      };
+
+      await api.post("/kupci", payload);
+
+      setIsCreateOpen(false);
+      setPage(1);
+      await fetchData();
+    } catch (e2) {
+      const statusCode = e2?.response?.status;
+      const data = e2?.response?.data;
+
+      if (statusCode === 422) {
+        setFieldErrors(normalizeErrors(data));
+        setCreateError("Proveri unete podatke.");
+      } else {
+        setCreateError("Greška pri kreiranju kupca. Pokušaj ponovo.");
+      }
+    } finally {
+      setCreateLoading(false);
     }
   }
 
@@ -153,6 +241,9 @@ export default function KupciTable() {
           </div>
 
           <div className="kupci-actions">
+            <button className="kupci-btn" type="button" onClick={openCreate} disabled={loading}>
+              <FiPlus /> Novi kupac
+            </button>
             <button className="kupci-btn" type="button" onClick={fetchData} disabled={loading}>
               <FiRefreshCw /> Osveži
             </button>
@@ -254,7 +345,6 @@ export default function KupciTable() {
                       Budžet {sortBy === "budzet" ? <SortMark dir={sortDir} /> : null}
                     </th>
 
-                    {/* ✅ NOVO: Akcije kolona */}
                     <th className="kupci-actions-col">Akcije</th>
                   </tr>
                 </thead>
@@ -285,7 +375,6 @@ export default function KupciTable() {
                       <td className="hide-sm">{r.lokacija || "—"}</td>
                       <td className="kupci-money">{money(r.budzet)}</td>
 
-                      {/* ✅ NOVO: dugme za brisanje */}
                       <td className="kupci-actions-cell">
                         <button
                           type="button"
@@ -337,6 +426,15 @@ export default function KupciTable() {
           </div>
         </div>
       </section>
+
+      <CreateKupacModal
+        isOpen={isCreateOpen}
+        onClose={closeCreate}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        error={createError}
+        fieldErrors={fieldErrors}
+      />
     </div>
   );
 }
