@@ -1,0 +1,425 @@
+/* =========================
+   Pocetna.css (HOMEPAGE)
+   ========================= */
+
+/* ---------- NAV ---------- */
+.crm-nav-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 14px 0;
+}
+
+.crm-brand{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.crm-brand.small .crm-brand-mark{ width: 26px; height: 26px; }
+
+.crm-brand-mark{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background:
+    radial-gradient(14px 14px at 30% 30%, rgba(255,255,255,0.85), transparent 60%),
+    linear-gradient(135deg, rgba(201,162,39,0.16), rgba(255,255,255,0.10));
+  border: 1px solid var(--stroke);
+  box-shadow: 0 12px 30px rgba(16,24,40,0.12);
+}
+
+.crm-brand-name{
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.crm-brand-sub{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.crm-nav-links{
+  display:flex;
+  align-items:center;
+  gap: 18px;
+  color: rgba(16,24,40,0.78);
+  font-size: 14px;
+}
+
+.crm-nav-links a{ opacity: .9; }
+.crm-nav-links a:hover{ opacity: 1; }
+
+.crm-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.55);
+  box-shadow: var(--shadow2);
+}
+
+/* ---------- HERO (kritično: slojevi) ---------- */
+.crm-hero{
+  position: relative;
+  padding: 54px 0 72px; /* više prostora da se ne “seče” dno */
+  isolation: isolate;   /* sprečava mešanje background layera sa sledećim sekcijama */
+}
+
+.crm-hero-bg{
+  position:absolute;
+  inset: 0;
+  pointer-events:none;
+  z-index: 0; /* obavezno ispod sadržaja */
+  background:
+    radial-gradient(900px 400px at 50% 0%, rgba(255,255,255,0.60), transparent 70%),
+    radial-gradient(600px 280px at 80% 35%, rgba(187, 120, 255, 0.10), transparent 70%),
+    radial-gradient(700px 320px at 15% 35%, rgba(94, 181, 255, 0.10), transparent 70%);
+}
+
+.crm-hero-grid{
+  position: relative;
+  z-index: 1; /* sadržaj iznad hero-bg */
+  display:grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 26px;
+  align-items: start;
+}
+
+@media (max-width: 980px){
+  .crm-hero-grid{ grid-template-columns: 1fr; }
+  .crm-nav-links{ display:none; }
+}
+
+.crm-badge{
+  display:inline-flex;
+  gap: 10px;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.55);
+  color: rgba(16,24,40,0.82);
+  font-size: 13px;
+}
+
+.crm-title{
+  margin: 18px 0 10px;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.8px;
+}
+
+.crm-subtitle{
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+.crm-hero-actions{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.crm-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.62);
+  color: rgba(16,24,40,0.88);
+  cursor:pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.crm-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.74);
+  border-color: rgba(15,23,42,0.18);
+}
+
+.crm-btn-primary{
+  background: linear-gradient(135deg, rgba(201,162,39,0.20), rgba(94, 181, 255, 0.14));
+  border-color: rgba(15,23,42,0.16);
+  box-shadow: var(--shadow2);
+}
+
+.crm-btn-ghost{
+  background: rgba(255,255,255,0.45);
+}
+
+/* TRUST */
+.crm-trust{
+  display:flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.crm-trust-item{
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.60);
+  border: 1px solid var(--stroke);
+  min-width: 150px;
+}
+
+.crm-trust-kpi{
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.crm-trust-label{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ---------- HERO GLASS MOCK ---------- */
+.crm-hero-right{
+  position: relative;
+  padding-bottom: 24px; /* prostor za shadow */
+}
+
+.crm-glass-top{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.55);
+}
+
+.crm-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 99px;
+  opacity: .9;
+}
+.crm-dot.red{ background: #ff5c7a; }
+.crm-dot.yellow{ background: #ffcc66; }
+.crm-dot.green{ background: #6ee7b7; }
+
+.crm-glass-title{
+  margin-left: 8px;
+  font-size: 12px;
+  color: rgba(16,24,40,0.70);
+}
+
+.crm-glass-body{ padding: 14px; }
+
+.crm-mini-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.crm-kpi{
+  display:flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.crm-kpi-ic{
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  display:grid;
+  place-items:center;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.55);
+}
+
+.crm-kpi-title{ font-size: 12px; color: rgba(16,24,40,0.70); }
+.crm-kpi-value{ font-size: 20px; font-weight: 900; margin-top: 2px; }
+.crm-kpi-hint{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.crm-divider{
+  height: 1px;
+  background: rgba(15,23,42,0.10);
+  margin: 14px 0;
+}
+
+.crm-row-title{
+  font-size: 12px;
+  color: rgba(16,24,40,0.70);
+  margin-bottom: 10px;
+}
+
+.crm-activity{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(15,23,42,0.10);
+  margin-bottom: 8px;
+}
+
+.crm-pill-soft{
+  display:inline-flex;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.60);
+  border: 1px solid rgba(15,23,42,0.12);
+  font-size: 12px;
+  color: rgba(16,24,40,0.72);
+}
+
+.crm-gallery-preview .crm-thumbs{
+  display:flex;
+  gap: 10px;
+}
+
+.crm-thumb{
+  height: 52px;
+  flex: 1;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background:
+    radial-gradient(70px 40px at 30% 20%, rgba(255,255,255,0.80), transparent 60%),
+    linear-gradient(135deg, rgba(201,162,39,0.14), rgba(94, 181, 255, 0.12));
+}
+.crm-thumb.b{ opacity: .92; }
+.crm-thumb.c{ opacity: .84; }
+.crm-thumb.d{ opacity: .76; }
+
+/* ---------- SECTIONS (kritično: uvek iznad hero slojeva) ---------- */
+.crm-section{
+  position: relative;
+  z-index: 2;      /* obavezno: da ništa iz hero-a ne “preliva” preko kartica */
+  padding: 56px 0;
+}
+
+.crm-section-alt{
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.20));
+  border-top: 1px solid rgba(15,23,42,0.08);
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+}
+
+.crm-section-head{ margin-bottom: 22px; }
+
+.crm-section-head h2{
+  margin: 0 0 10px;
+  font-size: 28px;
+  letter-spacing: -0.4px;
+}
+
+.crm-section-head p{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+/* CARDS */
+.crm-cards{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 980px){
+  .crm-cards{ grid-template-columns: 1fr; }
+}
+
+.crm-card{
+  padding: 18px;
+  transition: transform .14s ease, background .14s ease, border-color .14s ease;
+}
+
+.crm-card:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.74);
+  border-color: rgba(15,23,42,0.16);
+}
+
+.crm-card-ic{
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  display:grid;
+  place-items:center;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.60);
+}
+
+.crm-card-title{
+  margin-top: 12px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.crm-card-desc{
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+/* ROLES */
+.crm-roles{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 980px){
+  .crm-roles{ grid-template-columns: 1fr; }
+}
+
+.crm-role{
+  padding: 18px;
+}
+
+.crm-role-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.crm-role-title{ font-weight: 900; font-size: 18px; }
+
+.crm-role-tag{
+  font-size: 12px;
+  color: rgba(16,24,40,0.72);
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.60);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.crm-role-list{
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+
+.crm-role-list li{
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  color: rgba(16,24,40,0.84);
+}
+
+.crm-check{ margin-top: 2px; opacity: .9; }
