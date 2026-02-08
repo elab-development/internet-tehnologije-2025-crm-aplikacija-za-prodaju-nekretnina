@@ -96,4 +96,49 @@ class KupacController extends Controller
             'message' => 'Kupac obrisan'
         ]);
     }
+ 
+    // GET /api/kupci/search?q=...&page=1&per_page=10&sort_by=prezime&sort_dir=asc
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'q' => 'nullable|string|max:100',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'sort_by' => 'nullable|in:ime,prezime,email,telefon,budzet,lokacija,created_at',
+            'sort_dir' => 'nullable|in:asc,desc',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $q = trim((string) $request->get('q', ''));
+        $perPage = (int) $request->get('per_page', 10);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+
+        $query = Kupac::query();
+
+        if ($q !== '') {
+            $query->where(function ($qq) use ($q) {
+                $qq->where('ime', 'like', "%{$q}%")
+                ->orWhere('prezime', 'like', "%{$q}%")
+                ->orWhere('email', 'like', "%{$q}%")
+                ->orWhere('telefon', 'like', "%{$q}%")
+                ->orWhere('lokacija', 'like', "%{$q}%")
+                ->orWhere('napomena', 'like', "%{$q}%");
+            });
+        }
+
+        $result = $query
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage);
+
+        return response()->json($result);
+    }
+
+
+
 }
