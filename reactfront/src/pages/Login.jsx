@@ -53,10 +53,20 @@ export default function Login() {
       }
 
       localStorage.setItem("auth_token", token);
-      localStorage.setItem("auth_user", JSON.stringify(user));
+        localStorage.setItem("auth_user", JSON.stringify(user));
 
-      // opcionalno: preusmeri gde treba
-      navigate("/"); // ili "/dashboard"
+        /* REDIRECT PO ULOZI */
+        if (user.uloga === "administrator") {
+        navigate("/admin");
+        } else if (user.uloga === "menadzer") {
+        navigate("/menadzer");
+        } else if (user.uloga === "agent") {
+        navigate("/agent");
+        } else {
+        navigate("/");
+        }
+
+     
     } catch (err) {
       const status = err?.response?.status;
       const data = err?.response?.data;
