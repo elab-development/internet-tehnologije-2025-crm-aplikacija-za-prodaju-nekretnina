@@ -1,0 +1,329 @@
+/* =========================
+   KupciTable.css (light lux)
+   ========================= */
+
+.kupci-hero{
+  position: relative;
+  padding: 44px 0 18px;
+  isolation: isolate;
+}
+
+.kupci-bg{
+  position:absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events:none;
+  background:
+    radial-gradient(900px 420px at 25% 0%, rgba(201,162,39,0.14), transparent 65%),
+    radial-gradient(900px 420px at 85% 10%, rgba(99,102,241,0.10), transparent 65%),
+    radial-gradient(900px 520px at 50% 110%, rgba(15,23,42,0.08), transparent 62%);
+}
+
+.kupci-head{
+  position: relative;
+  z-index: 1;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 18px;
+}
+
+@media (max-width: 980px){
+  .kupci-head{ flex-direction:column; align-items:flex-start; }
+}
+
+.kupci-badge{
+  display:inline-flex;
+  gap: 10px;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.55);
+  color: rgba(16,24,40,0.82);
+  font-size: 13px;
+}
+
+.kupci-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 99px;
+  background: rgba(201,162,39,0.85);
+  box-shadow: 0 10px 28px rgba(201,162,39,0.18);
+}
+
+.kupci-title{
+  margin: 14px 0 8px;
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.6px;
+}
+
+.kupci-subtitle{
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 760px;
+}
+
+.kupci-actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kupci-btn{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.14);
+  background: rgba(255,255,255,0.62);
+  color: rgba(16,24,40,0.90);
+  cursor:pointer;
+  box-shadow: var(--shadow2);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.kupci-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.74);
+  border-color: rgba(15,23,42,0.18);
+}
+.kupci-btn:disabled{ opacity: .7; cursor: not-allowed; transform: none; }
+
+/* Toolbar */
+.kupci-toolbar{
+  position: relative;
+  z-index: 1;
+  margin-top: 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kupci-search{
+  flex: 1;
+  min-width: 260px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.62);
+  box-shadow: var(--shadow2);
+}
+
+.kupci-search-ic{ opacity: .75; }
+
+.kupci-search input{
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  color: rgba(16,24,40,0.92);
+  font-size: 14px;
+}
+
+.kupci-selects{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kupci-select{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.62);
+  box-shadow: var(--shadow2);
+  color: rgba(16,24,40,0.82);
+  font-size: 13px;
+}
+
+.kupci-select select{
+  border: none;
+  outline: none;
+  background: transparent;
+  color: rgba(16,24,40,0.92);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Card/Table */
+.kupci-card{
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.kupci-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.55);
+}
+
+.kupci-card-title{
+  font-weight: 900;
+  color: rgba(16,24,40,0.92);
+}
+
+.kupci-meta{
+  margin-left: 10px;
+  font-weight: 700;
+  color: rgba(16,24,40,0.70);
+  font-size: 12px;
+}
+
+.kupci-mini{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content:flex-end;
+}
+
+.kupci-mini-pill{
+  display:inline-flex;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.60);
+  color: rgba(16,24,40,0.76);
+  font-size: 12px;
+  font-weight: 800;
+}
+.kupci-mini-pill.subtle{
+  font-weight: 700;
+  opacity: .85;
+}
+
+.kupci-error{
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 92, 122, 0.25);
+  background: rgba(255, 92, 122, 0.10);
+  color: rgba(16,24,40,0.88);
+  font-size: 13px;
+}
+
+.kupci-table-wrap{
+  overflow:auto;
+  background: rgba(255,255,255,0.62);
+}
+
+.kupci-table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.kupci-table thead th{
+  text-align:left;
+  font-size: 12px;
+  color: rgba(16,24,40,0.70);
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.55);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  user-select:none;
+}
+
+.kupci-table thead th.is-sort{
+  cursor: pointer;
+}
+
+.kupci-sortmark{
+  margin-left: 6px;
+  font-size: 11px;
+  opacity: .8;
+}
+
+.kupci-table tbody td{
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(15,23,42,0.06);
+  color: rgba(16,24,40,0.86);
+  font-size: 14px;
+}
+
+.kupci-table tbody tr:hover{
+  background: rgba(255,255,255,0.74);
+}
+
+.kupci-name{
+  font-weight: 900;
+}
+
+.kupci-money{
+  font-weight: 900;
+}
+
+.kupci-empty,
+.kupci-loading{
+  text-align:center;
+  padding: 22px 14px;
+  color: rgba(16,24,40,0.70);
+}
+
+/* Pagination */
+.kupci-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.55);
+}
+
+.kupci-pagebtn{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.14);
+  background: rgba(255,255,255,0.62);
+  color: rgba(16,24,40,0.90);
+  cursor:pointer;
+  transition: transform .12s ease, background .12s ease;
+}
+.kupci-pagebtn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.74);
+}
+.kupci-pagebtn:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.kupci-pageinfo{
+  color: rgba(16,24,40,0.72);
+  font-size: 13px;
+}
+
+/* Responsive column hiding */
+@media (max-width: 1100px){
+  .hide-lg{ display:none; }
+  .kupci-table{ min-width: 760px; }
+}
+@media (max-width: 880px){
+  .hide-md{ display:none; }
+  .kupci-table{ min-width: 640px; }
+}
+@media (max-width: 620px){
+  .hide-sm{ display:none; }
+  .kupci-table{ min-width: 520px; }
+}
