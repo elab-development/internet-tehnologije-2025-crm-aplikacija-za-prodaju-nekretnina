@@ -12,9 +12,12 @@ class Nekretnina extends Model
         'adresa',
         'tip',
         'cena',
-        'status'
+        'status',
+        'atributi'   //npr kvadratura, broj soba, spratnost, itd. - sve u JSON formatu
     ];
-
+    protected $casts = [
+        'atributi' => 'array',
+    ];
     public function pregledi()
     {
         return $this->hasMany(Pregled::class);

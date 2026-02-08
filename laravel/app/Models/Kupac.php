@@ -14,7 +14,8 @@ class Kupac extends Model
         'telefon',
         'email',
         'budzet',
-        'lokacija'
+        'lokacija',
+        'napomena'
     ];
 
     public function pregledi()
