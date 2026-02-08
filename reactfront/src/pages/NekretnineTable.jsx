@@ -51,6 +51,41 @@ function normalizeErrors(payload) {
   return errs;
 }
 
+/**
+ * ✅ Formatiranje atributa za prikaz u 1 koloni
+ * Podržava:
+ * - r.atributi: array
+ * - r.atributi: JSON string
+ * - r.atributi_json: JSON string (fallback)
+ */
+function getAtributiLines(r) {
+  const raw = r?.atributi ?? r?.atributi_json ?? null;
+  if (!raw) return [];
+
+  let arr = raw;
+
+  if (typeof raw === "string") {
+    try {
+      arr = JSON.parse(raw);
+    } catch {
+      const s = raw.trim();
+      return s ? [s] : [];
+    }
+  }
+
+  if (!Array.isArray(arr) || arr.length === 0) return [];
+
+  return arr
+    .map((a) => {
+      const naziv = (a?.naziv ?? a?.name ?? "").toString().trim();
+      const vred = (a?.vrednost ?? a?.value ?? "").toString().trim();
+      if (!naziv && !vred) return "";
+      if (naziv && vred) return `${naziv}: ${vred}`;
+      return naziv || vred;
+    })
+    .filter(Boolean);
+}
+
 export default function NekretnineTable() {
   const [q, setQ] = useState("");
   const dq = useDebouncedValue(q, 350);
@@ -223,7 +258,6 @@ export default function NekretnineTable() {
     try {
       await api.delete(`/nekretnine/${id}`);
 
-      // Ako obrišemo poslednji red na strani, lepo je vratiti stranu unazad kad treba
       const willBeEmpty = rows.length === 1 && (meta?.current_page ?? page) > 1;
       if (willBeEmpty) setPage((p) => Math.max(1, p - 1));
       else await fetchData();
@@ -367,12 +401,22 @@ export default function NekretnineTable() {
                     <th onClick={() => toggleSort("status")} className="is-sort">
                       Status {sortBy === "status" ? <SortMark dir={sortDir} /> : null}
                     </th>
+
+                    {/* ✅ OVDE DODAJEMO KOLONU */}
+                    <th className="hide-md">Atributi</th>
+
                     <th onClick={() => toggleSort("cena")} className="is-sort">
                       Cena {sortBy === "cena" ? <SortMark dir={sortDir} /> : null}
                     </th>
-                    <th className="hide-md" onClick={() => toggleSort("created_at")} style={{ cursor: "pointer" }}>
+
+                    <th
+                      className="hide-md"
+                      onClick={() => toggleSort("created_at")}
+                      style={{ cursor: "pointer" }}
+                    >
                       Kreirano {sortBy === "created_at" ? <SortMark dir={sortDir} /> : null}
                     </th>
+
                     <th className="nek-actions-col">Akcije</th>
                   </tr>
                 </thead>
@@ -380,50 +424,79 @@ export default function NekretnineTable() {
                 <tbody>
                   {!loading && rows.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="nek-empty">
+                      <td colSpan={7} className="nek-empty">
                         Nema rezultata za ovu pretragu.
                       </td>
                     </tr>
                   ) : null}
 
-                  {rows.map((r) => (
-                    <tr key={r.id}>
-                      <td>
-                        <div className="nek-main">
-                          <FiHome className="nek-homeic" />
-                          <div>
-                            <div className="nek-addr">{r.adresa || "—"}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="nek-pillcol">
-                        <span className="nek-pill">{(r.tip || "—").toString()}</span>
-                      </td>
-                      <td className="nek-pillcol">
-                        <span className={`nek-pill nek-pill-${(r.status || "").toString().toLowerCase()}`}>
-                          {(r.status || "—").toString()}
-                        </span>
-                      </td>
-                      <td className="nek-money">{money(r.cena)}</td>
-                      <td className="hide-md">{r.created_at ? String(r.created_at).slice(0, 10) : "—"}</td>
+                  {rows.map((r) => {
+                    const attrLines = getAtributiLines(r);
 
-                      <td className="nek-actions-cell">
-                        <button
-                          type="button"
-                          className="nek-iconbtn danger"
-                          onClick={() => handleDelete(r.id)}
-                          disabled={deletingId === r.id}
-                          title="Obriši"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                    return (
+                      <tr key={r.id}>
+                        <td>
+                          <div className="nek-main">
+                            <FiHome className="nek-homeic" />
+                            <div>
+                              <div className="nek-addr">{r.adresa || "—"}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="nek-pillcol">
+                          <span className="nek-pill">{(r.tip || "—").toString()}</span>
+                        </td>
+
+                        <td className="nek-pillcol">
+                          <span
+                            className={`nek-pill nek-pill-${(r.status || "")
+                              .toString()
+                              .toLowerCase()}`}
+                          >
+                            {(r.status || "—").toString()}
+                          </span>
+                        </td>
+
+                        {/* ✅ OVDE PRIKAZUJEMO ATRIBUTE */}
+                        <td className="hide-md">
+                          {attrLines.length ? (
+                            <div className="nek-attrs-cell">
+                              {attrLines.map((line, idx) => (
+                                <div className="nek-attrs-line" key={idx} title={line}>
+                                  {line}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+
+                        <td className="nek-money">{money(r.cena)}</td>
+
+                        <td className="hide-md">
+                          {r.created_at ? String(r.created_at).slice(0, 10) : "—"}
+                        </td>
+
+                        <td className="nek-actions-cell">
+                          <button
+                            type="button"
+                            className="nek-iconbtn danger"
+                            onClick={() => handleDelete(r.id)}
+                            disabled={deletingId === r.id}
+                            title="Obriši"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
 
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="nek-loading">
+                      <td colSpan={7} className="nek-loading">
                         Učitavanje...
                       </td>
                     </tr>
@@ -465,13 +538,23 @@ export default function NekretnineTable() {
           <div className="nek-modal crm-glass">
             <div className="nek-modal-top">
               <div className="nek-modal-title">Nova nekretnina</div>
-              <button className="nek-iconbtn" type="button" onClick={closeCreate} disabled={createLoading} title="Zatvori">
+              <button
+                className="nek-iconbtn"
+                type="button"
+                onClick={closeCreate}
+                disabled={createLoading}
+                title="Zatvori"
+              >
                 <FiX />
               </button>
             </div>
 
             <div className="nek-modal-body">
-              {createError ? <div className="nek-error" style={{ borderBottom: "none" }}>{createError}</div> : null}
+              {createError ? (
+                <div className="nek-error" style={{ borderBottom: "none" }}>
+                  {createError}
+                </div>
+              ) : null}
 
               <form onSubmit={handleCreate} className="nek-form">
                 <label className="nek-label">
@@ -482,7 +565,9 @@ export default function NekretnineTable() {
                     onChange={(e) => setForm((f) => ({ ...f, adresa: e.target.value }))}
                     placeholder="npr. Bulevar kralja Aleksandra 12"
                   />
-                  {fieldErrors.adresa ? <div className="nek-field-error">{fieldErrors.adresa}</div> : null}
+                  {fieldErrors.adresa ? (
+                    <div className="nek-field-error">{fieldErrors.adresa}</div>
+                  ) : null}
                 </label>
 
                 <div className="nek-grid2">
@@ -498,7 +583,9 @@ export default function NekretnineTable() {
                       <option value="lokal">Lokal</option>
                       <option value="plac">Plac</option>
                     </select>
-                    {fieldErrors.tip ? <div className="nek-field-error">{fieldErrors.tip}</div> : null}
+                    {fieldErrors.tip ? (
+                      <div className="nek-field-error">{fieldErrors.tip}</div>
+                    ) : null}
                   </label>
 
                   <label className="nek-label">
@@ -512,7 +599,9 @@ export default function NekretnineTable() {
                       <option value="rezervisana">Rezervisana</option>
                       <option value="prodata">Prodata</option>
                     </select>
-                    {fieldErrors.status ? <div className="nek-field-error">{fieldErrors.status}</div> : null}
+                    {fieldErrors.status ? (
+                      <div className="nek-field-error">{fieldErrors.status}</div>
+                    ) : null}
                   </label>
                 </div>
 
@@ -525,7 +614,9 @@ export default function NekretnineTable() {
                     placeholder="npr. 125000"
                     inputMode="numeric"
                   />
-                  {fieldErrors.cena ? <div className="nek-field-error">{fieldErrors.cena}</div> : null}
+                  {fieldErrors.cena ? (
+                    <div className="nek-field-error">{fieldErrors.cena}</div>
+                  ) : null}
                 </label>
 
                 <div className="nek-form-actions">
@@ -533,7 +624,13 @@ export default function NekretnineTable() {
                     Otkaži
                   </button>
                   <button className="nek-btn primary" type="submit" disabled={createLoading}>
-                    {createLoading ? "Čuvanje..." : <>Sačuvaj <FiSave /></>}
+                    {createLoading ? (
+                      "Čuvanje..."
+                    ) : (
+                      <>
+                        Sačuvaj <FiSave />
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
