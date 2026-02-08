@@ -10,7 +10,13 @@ class Slika extends Model
 
     protected $fillable = [
         'nekretnina_id',
-        'putanja'
+        'putanja',
+        'istaknuta',
+        'redosled'
+    ];
+
+    protected $casts = [
+        'istaknuta' => 'boolean',
     ];
 
     public function nekretnina()
