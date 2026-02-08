@@ -327,3 +327,32 @@
   .hide-sm{ display:none; }
   .kupci-table{ min-width: 520px; }
 }
+.kupci-actions-col {
+  width: 84px;
+  text-align: right;
+}
+
+.kupci-actions-cell {
+  text-align: right;
+}
+
+.kupci-iconbtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.kupci-iconbtn.danger {
+  color: #ff5a5a;
+}
+
+.kupci-iconbtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

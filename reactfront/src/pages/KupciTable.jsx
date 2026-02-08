@@ -2,13 +2,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "./KupciTable.css";
 
-import { FiSearch, FiChevronLeft, FiChevronRight, FiRefreshCw } from "react-icons/fi";
+import {
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiRefreshCw,
+  FiTrash2,
+} from "react-icons/fi";
 
 const SORTABLE = [
   { key: "ime", label: "Ime" },
   { key: "prezime", label: "Prezime" },
-  { key: "email", label: "Email" }, 
-  { key: "budzet", label: "Budžet" }, 
+  { key: "email", label: "Email" },
+  { key: "budzet", label: "Budžet" },
   { key: "created_at", label: "Kreiran" },
 ];
 
@@ -39,16 +45,18 @@ export default function KupciTable() {
   const [sortDir, setSortDir] = useState("desc");
 
   const [rows, setRows] = useState([]);
-  const [meta, setMeta] = useState(null); // Laravel paginate meta (current_page, last_page, total...)
+  const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+
+  // brisanje
+  const [deletingId, setDeletingId] = useState(null);
 
   const sortLabel = useMemo(() => {
     const f = SORTABLE.find((x) => x.key === sortBy);
     return f ? f.label : sortBy;
   }, [sortBy]);
 
-  // reset na page 1 kada se menja pretraga/perPage/sort
   useEffect(() => {
     setPage(1);
   }, [dq, perPage, sortBy, sortDir]);
@@ -66,7 +74,7 @@ export default function KupciTable() {
           sort_dir: sortDir,
         },
       });
- 
+
       setRows(res.data?.data || []);
       setMeta({
         current_page: res.data?.current_page ?? 1,
@@ -91,7 +99,8 @@ export default function KupciTable() {
   }
 
   useEffect(() => {
-    fetchData(); 
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dq, page, perPage, sortBy, sortDir]);
 
   function toggleSort(colKey) {
@@ -105,6 +114,26 @@ export default function KupciTable() {
 
   const canPrev = meta ? meta.current_page > 1 : page > 1;
   const canNext = meta ? meta.current_page < meta.last_page : false;
+
+  async function handleDelete(id) {
+    const ok = window.confirm("Da li sigurno želiš da obrišeš ovog kupca?");
+    if (!ok) return;
+
+    setDeletingId(id);
+    setErr("");
+    try {
+      await api.delete(`/kupci/${id}`);
+
+      // ako obrišeš poslednji na strani, vrati stranu unazad
+      const willBeEmpty = rows.length === 1 && (meta?.current_page ?? page) > 1;
+      if (willBeEmpty) setPage((p) => Math.max(1, p - 1));
+      else await fetchData();
+    } catch (e) {
+      setErr("Greška pri brisanju kupca.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className="crm kupci-page">
@@ -144,16 +173,23 @@ export default function KupciTable() {
           <div className="kupci-selects">
             <div className="kupci-select">
               <span>Sort</span>
-              <select value={`${sortBy}:${sortDir}`} onChange={(e) => {
-                const [sb, sd] = e.target.value.split(":");
-                setSortBy(sb);
-                setSortDir(sd);
-              }}>
+              <select
+                value={`${sortBy}:${sortDir}`}
+                onChange={(e) => {
+                  const [sb, sd] = e.target.value.split(":");
+                  setSortBy(sb);
+                  setSortDir(sd);
+                }}
+              >
                 {SORTABLE.map((s) => (
-                  <option key={s.key} value={`${s.key}:asc`}>{s.label} (A→Z)</option>
+                  <option key={s.key} value={`${s.key}:asc`}>
+                    {s.label} (A→Z)
+                  </option>
                 ))}
                 {SORTABLE.map((s) => (
-                  <option key={s.key + "_d"} value={`${s.key}:desc`}>{s.label} (Z→A)</option>
+                  <option key={s.key + "_d"} value={`${s.key}:desc`}>
+                    {s.label} (Z→A)
+                  </option>
                 ))}
               </select>
             </div>
@@ -162,7 +198,9 @@ export default function KupciTable() {
               <span>Po strani</span>
               <select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
                 {[10, 20, 30, 50].map((n) => (
-                  <option key={n} value={n}>{n}</option>
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
                 ))}
               </select>
             </div>
@@ -215,13 +253,16 @@ export default function KupciTable() {
                     <th onClick={() => toggleSort("budzet")} className="is-sort">
                       Budžet {sortBy === "budzet" ? <SortMark dir={sortDir} /> : null}
                     </th>
+
+                    {/* ✅ NOVO: Akcije kolona */}
+                    <th className="kupci-actions-col">Akcije</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {!loading && rows.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="kupci-empty">
+                      <td colSpan={7} className="kupci-empty">
                         Nema rezultata za ovu pretragu.
                       </td>
                     </tr>
@@ -243,12 +284,25 @@ export default function KupciTable() {
                       <td className="hide-lg">{r.email || "—"}</td>
                       <td className="hide-sm">{r.lokacija || "—"}</td>
                       <td className="kupci-money">{money(r.budzet)}</td>
+
+                      {/* ✅ NOVO: dugme za brisanje */}
+                      <td className="kupci-actions-cell">
+                        <button
+                          type="button"
+                          className="kupci-iconbtn danger"
+                          onClick={() => handleDelete(r.id)}
+                          disabled={deletingId === r.id}
+                          title="Obriši"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </td>
                     </tr>
                   ))}
 
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="kupci-loading">
+                      <td colSpan={7} className="kupci-loading">
                         Učitavanje...
                       </td>
                     </tr>
