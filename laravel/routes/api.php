@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PregledController;
 use App\Http\Controllers\Api\AktivnostController;
 use App\Http\Controllers\Api\SlikaController;
 use App\Http\Controllers\Api\UserAdminController;
+use App\Http\Controllers\Api\AgentDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,8 +94,13 @@ Route::middleware(['auth:sanctum', 'uloga:agent'])->group(function () {
     Route::put('/nekretnine/{id}',   [NekretninaController::class, 'update']);
     Route::delete('/nekretnine/{id}',[NekretninaController::class, 'destroy']);
 
+
+     Route::get('/agent/dashboard', [AgentDashboardController::class, 'stats']);
+
     // slike
     Route::post('/nekretnine/{nekretninaId}/slike', [SlikaController::class, 'store']);
     Route::put('/slike/{id}',                      [SlikaController::class, 'update']);
     Route::delete('/slike/{id}',                   [SlikaController::class, 'destroy']);
 });
+
+ 

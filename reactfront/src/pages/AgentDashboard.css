@@ -174,3 +174,60 @@
   transform: none;
   background: rgba(255,255,255,0.62);
 }
+.agentdash-subtitle {
+  margin-top: 6px;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+.agentdash-error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(224, 102, 102, 0.18);
+  border: 1px solid rgba(224, 102, 102, 0.35);
+}
+
+.agentdash-charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.agentdash-chartcard {
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.agentdash-charthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.agentdash-charttitle {
+  font-weight: 700;
+}
+
+.agentdash-charthint {
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.agentdash-chartbody {
+  padding-top: 4px;
+}
+
+.agentdash-empty {
+  padding: 18px;
+  opacity: 0.8;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .agentdash-charts {
+    grid-template-columns: 1fr;
+  }
+}
