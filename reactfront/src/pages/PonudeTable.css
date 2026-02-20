@@ -59,3 +59,148 @@
 @media (max-width: 900px) {
   .hide-md { display:none; }
 }
+
+ 
+.ponude-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+
+.ponude-modal {
+  width: min(820px, 96vw);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+
+.ponude-modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ponude-modal-title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.ponude-iconbtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+}
+
+.ponude-iconbtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ponude-modal-body {
+  padding: 16px;
+}
+
+.ponude-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ponude-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ponude-grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 820px) {
+  .ponude-grid2,
+  .ponude-grid3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ponude-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.92rem;
+  opacity: 0.95;
+}
+
+.ponude-input {
+  height: 42px;
+  border-radius: 12px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  outline: none;
+}
+
+.ponude-input:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.ponude-input.is-error {
+  border-color: rgba(255, 80, 80, 0.8);
+}
+
+.ponude-field-error {
+  font-size: 0.82rem;
+  color: #ffb1b1;
+}
+
+.ponude-hint {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  padding-top: 2px;
+}
+
+.ponude-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+/* ako koristiš već postojeće .ponude-btn u PonudeTable.css, ovo će se lepo uklopiti;
+   u suprotnom, dodaj minimalno dugmad ovde */
+.ponude-btn {
+  height: 42px;
+  border-radius: 14px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ponude-btn.primary {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ponude-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,8 +1,19 @@
+ 
 import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "./PonudeTable.css";
 
-import { FiSearch, FiChevronLeft, FiChevronRight, FiRefreshCw, FiTrendingUp, FiTrash2 } from "react-icons/fi";
+import {
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiRefreshCw,
+  FiTrendingUp,
+  FiTrash2,
+  FiPlus,
+} from "react-icons/fi";
+
+import CreatePonudaModal from "../components/CreatePonudaModal";
 
 const SORTABLE = [
   { key: "created_at", label: "Kreirano" },
@@ -22,7 +33,6 @@ function money(n) {
 
 function fmtDate(d) {
   if (!d) return "—";
-  // "2026-02-08" ili ISO -> uzmi prvih 10
   return String(d).slice(0, 10);
 }
 
@@ -33,6 +43,17 @@ function useDebouncedValue(value, delay = 350) {
     return () => clearTimeout(t);
   }, [value, delay]);
   return deb;
+}
+
+function normalizeErrors(payload) {
+  const errs = {};
+  if (payload?.errors) {
+    for (const key of Object.keys(payload.errors)) {
+      const msg = Array.isArray(payload.errors[key]) ? payload.errors[key][0] : String(payload.errors[key]);
+      errs[key] = msg;
+    }
+  }
+  return errs;
 }
 
 export default function PonudeTable() {
@@ -54,6 +75,12 @@ export default function PonudeTable() {
 
   // brisanje
   const [deletingId, setDeletingId] = useState(null);
+
+  // create modal
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const sortLabel = useMemo(() => {
     const f = SORTABLE.find((x) => x.key === sortBy);
@@ -136,6 +163,67 @@ export default function PonudeTable() {
     }
   }
 
+  function openCreate() {
+    setCreateError("");
+    setFieldErrors({});
+    setIsCreateOpen(true);
+  }
+
+  function closeCreate() {
+    if (createLoading) return;
+    setIsCreateOpen(false);
+  }
+
+  async function handleCreate(payloadFromModal) {
+    setCreateError("");
+    setFieldErrors({});
+
+    // mini FE validacija
+    const fe = {};
+    if (!payloadFromModal?.kupac_id) fe.kupac_id = "Izaberi kupca.";
+    if (!payloadFromModal?.nekretnina_id) fe.nekretnina_id = "Izaberi nekretninu.";
+
+    const iznosRaw = payloadFromModal?.iznos;
+    if (iznosRaw === "" || iznosRaw === null || iznosRaw === undefined) fe.iznos = "Unesi iznos.";
+    else if (Number.isNaN(Number(iznosRaw)) || Number(iznosRaw) < 0) fe.iznos = "Iznos mora biti validan broj (>= 0).";
+
+    if (!payloadFromModal?.datum) fe.datum = "Izaberi datum.";
+
+    if (Object.keys(fe).length) {
+      setFieldErrors(fe);
+      return;
+    }
+
+    setCreateLoading(true);
+    try {
+      const finalPayload = {
+        kupac_id: Number(payloadFromModal.kupac_id),
+        nekretnina_id: Number(payloadFromModal.nekretnina_id),
+        cena: Number(payloadFromModal.iznos),
+        datum: payloadFromModal.datum,
+        status: payloadFromModal.status || "na_cekanju",
+      };
+
+      await api.post("/ponude", finalPayload);
+
+      setIsCreateOpen(false);
+      setPage(1);
+      await fetchData();
+    } catch (e2) {
+      const statusCode = e2?.response?.status;
+      const data = e2?.response?.data;
+
+      if (statusCode === 422) {
+        setFieldErrors(normalizeErrors(data));
+        setCreateError("Proveri unete podatke.");
+      } else {
+        setCreateError("Greška pri kreiranju ponude. Pokušaj ponovo.");
+      }
+    } finally {
+      setCreateLoading(false);
+    }
+  }
+
   return (
     <div className="crm ponude-page">
       <section className="ponude-hero">
@@ -149,11 +237,14 @@ export default function PonudeTable() {
             </div>
             <h1 className="ponude-title">Pregled ponuda</h1>
             <p className="ponude-subtitle">
-              Pretraži po kupcu/nekretnini/statusu (ako backend pokriva), filtriraj po statusu i sortiraj klikom na kolonu.
+              Pretraži, filtriraj po statusu i sortiraj klikom na kolonu. Kreiraj novu ponudu iz modala.
             </p>
           </div>
 
           <div className="ponude-actions">
+            <button className="ponude-btn" type="button" onClick={openCreate} disabled={loading}>
+              <FiPlus /> Nova ponuda
+            </button>
             <button className="ponude-btn" type="button" onClick={fetchData} disabled={loading}>
               <FiRefreshCw /> Osveži
             </button>
@@ -348,6 +439,15 @@ export default function PonudeTable() {
           </div>
         </div>
       </section>
+
+      <CreatePonudaModal
+        isOpen={isCreateOpen}
+        onClose={closeCreate}
+        onSubmit={handleCreate}
+        loading={createLoading}
+        error={createError}
+        fieldErrors={fieldErrors}
+      />
     </div>
   );
 }

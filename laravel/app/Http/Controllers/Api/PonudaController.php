@@ -29,6 +29,7 @@ class PonudaController extends Controller
             'cena' => 'required|numeric|min:0',
             'status' => 'nullable|string|max:50',
             'napomena' => 'nullable|string',
+            'datum' => 'required|date',
         ]);
 
         if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
@@ -36,9 +37,11 @@ class PonudaController extends Controller
         $row = Ponuda::create([
             'kupac_id' => $request->kupac_id,
             'nekretnina_id' => $request->nekretnina_id,
-            'cena' => $request->cena,
+            'iznos' => $request->cena,
             'status' => $request->status ?? 'u_toku',
             'napomena' => $request->napomena ?? null,
+            'korisnik_id' => auth()->id(),
+              'datum' => $request->datum,  
         ]);
 
         return response()->json($row, 201);
