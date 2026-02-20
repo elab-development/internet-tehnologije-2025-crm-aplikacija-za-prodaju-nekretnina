@@ -177,7 +177,7 @@ export default function NekretnineTable() {
     setIsCreateOpen(false);
   }
 
-  // ✅ OVO PRIMA PODATKE IZ MODALA (uključujući atributi)
+ 
   async function handleCreate(payloadFromModal) {
     setCreateError("");
     setFieldErrors({});
