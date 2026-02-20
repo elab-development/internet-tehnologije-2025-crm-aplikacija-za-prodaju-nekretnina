@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\AktivnostController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\KupacController;
 use App\Http\Controllers\Api\NekretninaController;
+use App\Http\Controllers\Api\PonudaController;
+use App\Http\Controllers\Api\PregledController;
 use App\Http\Controllers\Api\SlikaController;
+use App\Http\Controllers\Api\UserAdminController;
 
 // AUTH
 Route::post('/register', [AuthController::class, 'register']);
@@ -43,3 +47,17 @@ Route::middleware(['auth:sanctum', 'uloga:agent'])->group(function () {
 // (opciono) test rute
 Route::middleware(['auth:sanctum', 'uloga:administrator'])->get('/admin', fn () => "Admin ruta");
 Route::middleware(['auth:sanctum', 'uloga:agent,menadzer'])->get('/zaposleni', fn () => "Agent ili Menadzer");
+Route::get('/ponude/search', [PonudaController::class, 'search']);
+Route::apiResource('ponude', PonudaController::class)->only(['index','show','store','update','destroy']);
+
+Route::get('/pregledi/search', [PregledController::class, 'search']);
+Route::apiResource('pregledi', PregledController::class)->only(['index','show','store','update','destroy']);
+
+Route::get('/aktivnosti/search', [AktivnostController::class, 'search']);
+Route::apiResource('aktivnosti', AktivnostController::class)->only(['index','show','store','update','destroy']);
+
+// ADMIN users (soft delete + restore + stats)
+Route::get('/admin/users/search', [UserAdminController::class, 'search']);
+Route::get('/admin/users/stats', [UserAdminController::class, 'stats']);
+Route::delete('/admin/users/{id}', [UserAdminController::class, 'destroy']); // soft delete
+Route::post('/admin/users/{id}/restore', [UserAdminController::class, 'restore']);
