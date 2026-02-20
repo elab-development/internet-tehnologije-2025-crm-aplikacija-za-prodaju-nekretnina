@@ -1,0 +1,61 @@
+/* PonudeTable.css */
+.ponude-hero { position: relative; padding: 28px 0 14px; }
+.ponude-bg { position: absolute; inset: 0; opacity: 0.25; pointer-events: none; }
+
+.ponude-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; }
+.ponude-badge { display:inline-flex; align-items:center; gap:10px; margin-bottom:10px; }
+.ponude-dot { width:10px; height:10px; border-radius:999px; background: #7c3aed; display:inline-block; }
+.ponude-title { margin:0; }
+.ponude-subtitle { margin:8px 0 0; opacity:0.9; }
+
+.ponude-actions { display:flex; gap:10px; }
+.ponude-btn { display:inline-flex; align-items:center; gap:8px; }
+
+.ponude-toolbar { display:flex; justify-content:space-between; gap:12px; margin-top:16px; flex-wrap:wrap; }
+.ponude-search { display:flex; align-items:center; gap:10px; min-width:280px; flex:1; }
+.ponude-search input { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.15); color: inherit; }
+.ponude-search-ic { opacity:0.85; }
+
+.ponude-filters { display:flex; gap:10px; flex-wrap:wrap; }
+.ponude-select { display:flex; align-items:center; gap:10px; }
+.ponude-select select { padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.15); color: inherit; }
+
+.ponude-card { padding:14px; border-radius:18px; }
+.ponude-card-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+.ponude-card-title { font-weight:700; }
+.ponude-meta { margin-left:8px; opacity:0.85; font-weight:400; }
+
+.ponude-mini { display:flex; gap:10px; }
+.ponude-mini-pill { padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); }
+.ponude-mini-pill.subtle { opacity:0.75; }
+
+.ponude-error { padding:10px 12px; border-radius:12px; background: rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.18); margin:10px 0; }
+
+.ponude-table-wrap { overflow:auto; }
+.ponude-table { width:100%; border-collapse:collapse; min-width:900px; }
+.ponude-table th, .ponude-table td { padding:12px 10px; border-bottom:1px solid rgba(255,255,255,0.08); text-align:left; }
+.ponude-table th.is-sort { cursor:pointer; user-select:none; }
+.ponude-sortmark { margin-left:6px; opacity:0.9; }
+
+.ponude-main { display:flex; align-items:center; gap:8px; }
+.ponude-ic { opacity:0.85; }
+
+.ponude-money { font-weight:700; }
+.ponude-empty, .ponude-loading { text-align:center; opacity:0.85; padding:18px 10px; }
+
+.ponude-pillcol { }
+.ponude-pill { display:inline-flex; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); }
+
+.ponude-actions-col { width: 90px; }
+.ponude-actions-cell { text-align:right; }
+.ponude-iconbtn { border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:8px; background: rgba(0,0,0,0.12); cursor:pointer; }
+.ponude-iconbtn.danger { border-color: rgba(255,0,0,0.18); }
+
+.ponude-pagination { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.ponude-pagebtn { display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.12); cursor:pointer; }
+.ponude-pageinfo { opacity:0.9; }
+
+.hide-md { }
+@media (max-width: 900px) {
+  .hide-md { display:none; }
+}

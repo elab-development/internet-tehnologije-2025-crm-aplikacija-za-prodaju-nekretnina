@@ -31,4 +31,11 @@ class Ponuda extends Model
     {
         return $this->belongsTo(User::class, 'korisnik_id');
     }
+
+ 
+
+public function korisnik()
+{
+    return $this->belongsTo(\App\Models\User::class, 'korisnik_id');
+}
 }

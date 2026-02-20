@@ -92,18 +92,51 @@ class PonudaController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDir = $request->get('sort_dir', 'desc');
 
-        $query = Ponuda::query();
+       $query = Ponuda::query()
+    ->with([
+        'kupac:id,ime,prezime,email,telefon',
+        'nekretnina:id,adresa,tip,status',
+        'korisnik:id,ime,prezime,email',
+    ]);
 
         if ($q !== '') {
             $query->where(function ($qq) use ($q) {
                 $qq->where('napomena', 'like', "%{$q}%")
-                   ->orWhere('status', 'like', "%{$q}%");
+                ->orWhere('status', 'like', "%{$q}%");
             });
         }
 
         if ($status !== '') $query->where('status', $status);
 
         $result = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
+
+      
+        $result->getCollection()->transform(function ($p) {
+            return [
+                'id' => $p->id,
+
+                'kupac_id' => $p->kupac_id,
+                'kupac_ime' => $p->kupac ? $p->kupac->ime : null,
+                'kupac_prezime' => $p->kupac ? $p->kupac->prezime : null,
+                'kupac_full' => $p->kupac ? trim($p->kupac->ime . ' ' . $p->kupac->prezime) : null,
+
+                'nekretnina_id' => $p->nekretnina_id,
+                'nekretnina_adresa' => $p->nekretnina ? $p->nekretnina->adresa : null,
+                'nekretnina_tip' => $p->nekretnina ? $p->nekretnina->tip : null,
+
+                'korisnik_id' => $p->korisnik_id,
+                'agent_full' => $p->korisnik ? trim($p->korisnik->ime . ' ' . $p->korisnik->prezime) : null,
+
+              
+                'iznos' => $p->iznos ?? $p->cena ?? null,
+                'datum' => $p->datum ?? null,
+                'status' => $p->status ?? null,
+
+                'created_at' => $p->created_at,
+                'updated_at' => $p->updated_at,
+            ];
+        });
+
         return response()->json($result);
     }
 }

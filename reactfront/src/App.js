@@ -7,6 +7,7 @@ import AgentDashboard from './pages/AgentDashboard';
 import KupciTable from './pages/KupciTable';
 import NekretnineTable from './pages/NekretnineTable';
 import NavBar from './components/NavBar';
+import PonudeTable from './pages/PonudeTable';
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
       <Route path="/kupci" element={<KupciTable />} />
       <Route path="/nekretnine" element={<NekretnineTable />} />
 
+
+    <Route path="/ponude" element={<PonudeTable />} />
       
     </Routes>
      
