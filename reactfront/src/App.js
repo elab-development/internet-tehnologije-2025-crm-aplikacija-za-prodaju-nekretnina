@@ -9,6 +9,8 @@ import NekretnineTable from './pages/NekretnineTable';
 import NavBar from './components/NavBar';
 import PonudeTable from './pages/PonudeTable';
 import PreglediTable from './pages/PreglediTable';
+import NekretnineListPage from './pages/NekretnineListPage';
+import NekretninaDetailsPage from './pages/NekretninaDetailsPage';
 
 function App() {
   return (
@@ -24,6 +26,9 @@ function App() {
 
     <Route path="/ponude" element={<PonudeTable />} />
      <Route path="/pregledi" element={<PreglediTable />} />
+
+       <Route path="/ponuda-nekretnina" element={<NekretnineListPage />} />
+      <Route path="/ponuda-nekretnina/:id" element={<NekretninaDetailsPage />} />
       
     </Routes>
      

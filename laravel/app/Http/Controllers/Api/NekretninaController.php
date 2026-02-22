@@ -12,10 +12,12 @@ class NekretninaController extends Controller
     // GET /api/nekretnine
     public function index()
     {
-       
-        // return response()->json(Nekretnina::with('slike')->get());
+        $nekretnine = Nekretnina::with(['slike' => function ($q) {
+            $q->orderByDesc('istaknuta')
+            ->orderBy('redosled');
+        }])->get();
 
-        return response()->json(Nekretnina::all());
+        return response()->json($nekretnine);
     }
 
     // GET /api/nekretnine/{id}

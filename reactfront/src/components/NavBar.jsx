@@ -69,6 +69,8 @@ export default function NavBar() {
       { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
       { to: "/ponude", label: "Ponude", icon: <FiMap /> },
       { to: "/pregledi", label: "Pregledi", icon: <FiCalendar /> },
+      { to: "/ponuda-nekretnina", label: "Ponuda nekretnina", icon: <FiGrid /> },
+
 
     ];
   }, [isAuthed]);
