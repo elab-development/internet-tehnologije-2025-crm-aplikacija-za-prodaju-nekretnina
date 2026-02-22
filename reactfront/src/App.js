@@ -8,6 +8,7 @@ import KupciTable from './pages/KupciTable';
 import NekretnineTable from './pages/NekretnineTable';
 import NavBar from './components/NavBar';
 import PonudeTable from './pages/PonudeTable';
+import PreglediTable from './pages/PreglediTable';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
 
 
     <Route path="/ponude" element={<PonudeTable />} />
+     <Route path="/pregledi" element={<PreglediTable />} />
       
     </Routes>
      

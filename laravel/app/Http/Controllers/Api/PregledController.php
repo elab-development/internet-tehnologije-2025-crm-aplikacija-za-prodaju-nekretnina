@@ -31,7 +31,9 @@ class PregledController extends Controller
             'napomena' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $row = Pregled::create([
             'kupac_id' => $request->kupac_id,
@@ -57,7 +59,9 @@ class PregledController extends Controller
             'napomena' => 'sometimes|nullable|string',
         ]);
 
-        if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $row->update($request->only(['kupac_id','nekretnina_id','datum_vreme','status','napomena']));
         return response()->json($row);
@@ -84,11 +88,13 @@ class PregledController extends Controller
             'sort_dir' => 'nullable|in:asc,desc',
         ]);
 
-        if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-        $q = trim((string)$request->get('q',''));
-        $status = trim((string)$request->get('status',''));
-        $perPage = (int)$request->get('per_page', 10);
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+        $perPage = (int) $request->get('per_page', 10);
         $sortBy = $request->get('sort_by', 'datum_vreme');
         $sortDir = $request->get('sort_dir', 'desc');
 
@@ -101,7 +107,15 @@ class PregledController extends Controller
             });
         }
 
-        if ($status !== '') $query->where('status', $status);
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        // zaštita da se ne sortira po nepostojećoj koloni (ako neko pošalje sort_by pogrešno)
+        $allowed = ['created_at','datum_vreme','status','kupac_id','nekretnina_id'];
+        if (!in_array($sortBy, $allowed, true)) {
+            $sortBy = 'created_at';
+        }
 
         $result = $query->orderBy($sortBy, $sortDir)->paginate($perPage);
         return response()->json($result);

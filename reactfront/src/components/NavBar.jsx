@@ -10,7 +10,8 @@ import {
   FiLogOut,
   FiGrid,
   FiUsers,
-  FiMap,         
+  FiMap,
+  FiCalendar,         
 } from "react-icons/fi";
 
 /**
@@ -66,6 +67,9 @@ export default function NavBar() {
       { to: "/agent", label: "Agent dashboard", icon: <FiGrid /> },
       { to: "/kupci", label: "Kupci", icon: <FiUsers /> },
       { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
+      { to: "/ponude", label: "Ponude", icon: <FiMap /> },
+      { to: "/pregledi", label: "Pregledi", icon: <FiCalendar /> },
+
     ];
   }, [isAuthed]);
 
