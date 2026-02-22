@@ -520,4 +520,111 @@
   bottom: 12px;
   display:flex;
   gap: 10px;
+}/* =========================
+   Slike u Create/Edit modalu
+   ========================= */
+
+.nek-img-grid{
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 820px){
+  .nek-img-grid{ grid-template-columns: 1fr; }
+}
+
+.nek-img-card{
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.nek-img-thumb{
+  position: relative;
+  height: 160px;
+  background: rgba(0,0,0,0.10);
+}
+
+.nek-img-thumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nek-img-badge{
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.12);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.nek-img-controls{
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+}
+
+.nek-img-controls .nek-label{
+  gap: 6px;
+}/* =========================
+   FIX: modal scroll + dugmad uvek vidljiva
+   ========================= */
+
+.nek-modal-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.35);
+}
+
+/* modal container - ograniči visinu */
+.nek-modal{
+  width: min(920px, 96vw);
+  max-height: min(86vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* bitno: da body scroll radi u okviru modala */
+}
+
+/* top ostaje fiksan gore */
+.nek-modal-top{
+  flex: 0 0 auto;
+}
+
+/* body dobija scroll kad sadržaj poraste (npr. slike) */
+.nek-modal-body{
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-bottom: 90px; /* prostor da sticky dugmad ne prekriju sadržaj */
+}
+
+/* dugmad ostaju uvek dole */
+.nek-form-actions{
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(15,23,42,0.10);
+  padding: 12px 0 6px;
+  margin-top: 12px;
+}
+
+/* mali spacing da ne bude zalepljeno */
+.nek-form-actions .nek-btn{
+  margin-bottom: 6px;
 }

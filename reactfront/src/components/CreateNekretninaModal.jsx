@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FiX, FiSave, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiX, FiSave, FiPlus, FiTrash2, FiImage } from "react-icons/fi";
 import {
   FiMaximize2,
   FiHome,
@@ -36,6 +36,28 @@ function uid() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
+function safeParseArray(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const v = JSON.parse(raw);
+      return Array.isArray(v) ? v : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function fileToPreviewUrl(file) {
+  try {
+    return URL.createObjectURL(file);
+  } catch {
+    return "";
+  }
+}
+
 export default function CreateNekretninaModal({
   isOpen,
   onClose,
@@ -43,6 +65,8 @@ export default function CreateNekretninaModal({
   loading,
   error,
   fieldErrors,
+  mode = "create", // "create" | "edit"
+  initialData = null, // row from table for edit
 }) {
   const [form, setForm] = useState({
     adresa: "",
@@ -63,6 +87,12 @@ export default function CreateNekretninaModal({
     { id: uid(), type: "kvadratura", icon: "FiMaximize2", naziv: "Kvadratura", vrednost: "" },
   ]);
 
+  /**
+   * images (NEW to upload):
+   * [{ id, file, previewUrl, istaknuta, redosled }]
+   */
+  const [images, setImages] = useState([]);
+
   const iconMap = useMemo(() => {
     const m = {};
     ATTR_TYPES.forEach((x) => (m[x.iconKey] = x.Comp));
@@ -78,10 +108,57 @@ export default function CreateNekretninaModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    setForm({ adresa: "", tip: "stan", cena: "", status: "dostupna" });
-    setAttrs([
-      { id: uid(), type: "kvadratura", icon: "FiMaximize2", naziv: "Kvadratura", vrednost: "" },
-    ]);
+    // RESET + init for create/edit
+    if (mode === "edit" && initialData) {
+      setForm({
+        adresa: initialData?.adresa ?? "",
+        tip: initialData?.tip ?? "stan",
+        cena: initialData?.cena ?? "",
+        status: initialData?.status ?? "dostupna",
+      });
+
+      const rawAttrs = safeParseArray(initialData?.atributi ?? initialData?.atributi_json);
+      const mappedAttrs =
+        rawAttrs.length > 0
+          ? rawAttrs.map((a) => {
+              const naziv = (a?.naziv ?? "").toString();
+              // pokušaj da prepoznaš tip po nazivu (nije 100% potrebno)
+              const lower = naziv.toLowerCase();
+              const guessed =
+                ATTR_TYPES.find((t) => t.type !== "tip_objekta" && t.label.toLowerCase() === lower) ||
+                ATTR_TYPES.find((t) => t.type !== "tip_objekta" && t.type === lower) ||
+                ATTR_TYPES[0];
+
+              return {
+                id: uid(),
+                type: guessed?.type ?? "kvadratura",
+                icon: (a?.icon ?? guessed?.iconKey ?? "FiHome").toString(),
+                naziv: (a?.naziv ?? guessed?.label ?? "").toString(),
+                vrednost: (a?.vrednost ?? "").toString(),
+              };
+            })
+          : [{ id: uid(), type: "kvadratura", icon: "FiMaximize2", naziv: "Kvadratura", vrednost: "" }];
+
+      setAttrs(mappedAttrs);
+      setImages([]); // u edit-u dodaješ samo NOVE slike ovde
+    } else {
+      setForm({ adresa: "", tip: "stan", cena: "", status: "dostupna" });
+      setAttrs([{ id: uid(), type: "kvadratura", icon: "FiMaximize2", naziv: "Kvadratura", vrednost: "" }]);
+      setImages([]);
+    }
+
+    // cleanup preview urls kad zatvoriš modal
+    return () => {
+      setImages((prev) => {
+        prev.forEach((im) => {
+          try {
+            if (im.previewUrl) URL.revokeObjectURL(im.previewUrl);
+          } catch {}
+        });
+        return prev;
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -122,6 +199,57 @@ export default function CreateNekretninaModal({
     setAttrs((prev) => prev.filter((a) => a.id !== id));
   }
 
+  function onPickFiles(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    setImages((prev) => {
+      const baseRedosled = prev.length ? Math.max(...prev.map((p) => Number(p.redosled || 0))) + 1 : 0;
+      const next = files.map((f, idx) => ({
+        id: uid(),
+        file: f,
+        previewUrl: fileToPreviewUrl(f),
+        istaknuta: false,
+        redosled: baseRedosled + idx,
+      }));
+
+      // ako još nemamo istaknutu među NOVIM slikama, prva nova može biti istaknuta
+      const hasFeatured = prev.some((p) => p.istaknuta) || next.some((p) => p.istaknuta);
+      if (!hasFeatured && next.length) next[0].istaknuta = true;
+
+      return [...prev, ...next];
+    });
+
+    // reset input da može ponovo isti fajl
+    e.target.value = "";
+  }
+
+  function setFeatured(id) {
+    setImages((prev) => prev.map((im) => ({ ...im, istaknuta: im.id === id })));
+  }
+
+  function updateImage(id, patch) {
+    setImages((prev) => prev.map((im) => (im.id === id ? { ...im, ...patch } : im)));
+  }
+
+  function removeImage(id) {
+    setImages((prev) => {
+      const target = prev.find((x) => x.id === id);
+      if (target?.previewUrl) {
+        try {
+          URL.revokeObjectURL(target.previewUrl);
+        } catch {}
+      }
+      const rest = prev.filter((x) => x.id !== id);
+
+      // ako si obrisala istaknutu, postavi prvu kao istaknutu (ako postoji)
+      const hasFeatured = rest.some((x) => x.istaknuta);
+      if (!hasFeatured && rest.length) rest[0].istaknuta = true;
+
+      return [...rest];
+    });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -130,10 +258,17 @@ export default function CreateNekretninaModal({
         icon: (a.icon || "FiHome").toString(),
         naziv: (a.naziv || "").trim(),
         vrednost: (a.vrednost || "").trim(),
-        // Ako ti treba i tip na backendu:
         // type: (a.type || "").toString(),
       }))
       .filter((a) => a.naziv !== "" || a.vrednost !== "");
+
+    const cleanImages = images
+      .filter((im) => im?.file instanceof File)
+      .map((im) => ({
+        file: im.file,
+        istaknuta: !!im.istaknuta,
+        redosled: Number.isFinite(Number(im.redosled)) ? Number(im.redosled) : 0,
+      }));
 
     await onSubmit({
       adresa: form.adresa.trim(),
@@ -141,6 +276,9 @@ export default function CreateNekretninaModal({
       status: form.status,
       cena: form.cena,
       atributi: cleanAttrs.length ? cleanAttrs : null,
+
+      // ✅ NOVO: slike za upload
+      slike: cleanImages,
     });
   }
 
@@ -148,7 +286,7 @@ export default function CreateNekretninaModal({
     <div className="nek-modal-backdrop" role="dialog" aria-modal="true">
       <div className="nek-modal crm-glass">
         <div className="nek-modal-top">
-          <div className="nek-modal-title">Nova nekretnina</div>
+          <div className="nek-modal-title">{mode === "edit" ? "Izmena nekretnine" : "Nova nekretnina"}</div>
 
           <button className="nek-iconbtn" type="button" onClick={onClose} disabled={loading} title="Zatvori">
             <FiX />
@@ -214,6 +352,83 @@ export default function CreateNekretninaModal({
               />
               {fieldErrors?.cena ? <div className="nek-field-error">{fieldErrors.cena}</div> : null}
             </label>
+
+            {/* ✅ SLIKE */}
+            <div className="nek-attrs">
+              <div className="nek-attrs-top">
+                <div className="nek-attrs-title">Slike</div>
+
+                <label className="nek-btn" style={{ cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+                  <FiImage /> Dodaj slike
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    multiple
+                    onChange={onPickFiles}
+                    disabled={loading}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+
+              {mode === "edit" ? (
+                <div className="nek-attrs-hint" style={{ marginTop: 6 }}>
+                  U izmeni ovde dodaješ samo <b>nove</b> slike (postojeće ne diramo u ovom modalu).
+                </div>
+              ) : null}
+
+              {images.length ? (
+                <div className="nek-img-grid">
+                  {images
+                    .slice()
+                    .sort((a, b) => Number(a.redosled || 0) - Number(b.redosled || 0))
+                    .map((im) => (
+                      <div className="nek-img-card" key={im.id}>
+                        <div className="nek-img-thumb">
+                          {im.previewUrl ? <img src={im.previewUrl} alt="preview" /> : null}
+                          {im.istaknuta ? <span className="nek-img-badge">Istaknuta</span> : null}
+                        </div>
+
+                        <div className="nek-img-controls">
+                          <button
+                            type="button"
+                            className="nek-btn"
+                            onClick={() => setFeatured(im.id)}
+                            disabled={loading}
+                            style={{ padding: "10px 12px" }}
+                          >
+                            Istakni
+                          </button>
+
+                          <label className="nek-label" style={{ margin: 0, flex: 1 }}>
+                            Redosled
+                            <input
+                              className="nek-input"
+                              value={im.redosled}
+                              onChange={(e) => updateImage(im.id, { redosled: e.target.value })}
+                              inputMode="numeric"
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            className="nek-iconbtn danger"
+                            onClick={() => removeImage(im.id)}
+                            disabled={loading}
+                            title="Ukloni sliku"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="nek-attrs-hint" style={{ marginTop: 6 }}>
+                  Nema dodatih slika. Dodaj jednu ili više slika (JPG/PNG/WEBP).
+                </div>
+              )}
+            </div>
 
             {/* ATRIBUTI */}
             <div className="nek-attrs">
@@ -290,7 +505,11 @@ export default function CreateNekretninaModal({
                 Otkaži
               </button>
               <button className="nek-btn primary" type="submit" disabled={loading}>
-                {loading ? "Čuvanje..." : <>Sačuvaj <FiSave /></>}
+                {loading ? "Čuvanje..." : (
+                  <>
+                    Sačuvaj <FiSave />
+                  </>
+                )}
               </button>
             </div>
           </form>

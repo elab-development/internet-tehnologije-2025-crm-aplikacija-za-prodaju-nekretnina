@@ -2,10 +2,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
 import "./NekretnineTable.css";
 
-import { FiSearch, FiChevronLeft, FiChevronRight, FiRefreshCw, FiHome, FiPlus, FiTrash2 } from "react-icons/fi";
+import {
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight,
+  FiRefreshCw,
+  FiHome,
+  FiPlus,
+  FiTrash2,
+  FiEdit2,
+} from "react-icons/fi";
 import CreateNekretninaModal from "../components/CreateNekretninaModal";
 
- 
 const SORTABLE = [
   { key: "adresa", label: "Adresa" },
   { key: "tip", label: "Tip" },
@@ -100,6 +108,9 @@ export default function NekretnineTable() {
   const [createError, setCreateError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // EDIT mode
+  const [editingRow, setEditingRow] = useState(null);
+
   // brisanje
   const [deletingId, setDeletingId] = useState(null);
 
@@ -169,15 +180,41 @@ export default function NekretnineTable() {
   function openCreate() {
     setCreateError("");
     setFieldErrors({});
+    setEditingRow(null);
+    setIsCreateOpen(true);
+  }
+
+  function openEdit(row) {
+    setCreateError("");
+    setFieldErrors({});
+    setEditingRow(row);
     setIsCreateOpen(true);
   }
 
   function closeCreate() {
     if (createLoading) return;
     setIsCreateOpen(false);
+    setEditingRow(null);
   }
 
- 
+  async function uploadImagesForNekretnina(nekretninaId, imagesPayload) {
+    // imagesPayload: [{ file: File, istaknuta: boolean, redosled: number }]
+    if (!nekretninaId) return;
+    if (!Array.isArray(imagesPayload) || imagesPayload.length === 0) return;
+
+    // Upload jedna po jedna (jednostavno i stabilno)
+    for (const img of imagesPayload) {
+      const fd = new FormData();
+      fd.append("slika", img.file);
+      fd.append("istaknuta", img.istaknuta ? "1" : "0");
+      fd.append("redosled", String(img.redosled ?? 0));
+
+      await api.post(`/nekretnine/${nekretninaId}/slike`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
+  }
+
   async function handleCreate(payloadFromModal) {
     setCreateError("");
     setFieldErrors({});
@@ -199,12 +236,17 @@ export default function NekretnineTable() {
         tip: payloadFromModal.tip,
         status: payloadFromModal.status,
         cena: Number(payloadFromModal.cena),
-        atributi: payloadFromModal.atributi ?? null, // ✅ šaljemo atribute
+        atributi: payloadFromModal.atributi ?? null,
       };
 
-      await api.post("/nekretnine", finalPayload);
+      const res = await api.post("/nekretnine", finalPayload);
+      const created = res?.data;
+      const createdId = created?.id;
+
+      await uploadImagesForNekretnina(createdId, payloadFromModal?.slike ?? []);
 
       setIsCreateOpen(false);
+      setEditingRow(null);
       setPage(1);
       await fetchData();
     } catch (e2) {
@@ -216,6 +258,57 @@ export default function NekretnineTable() {
         setCreateError("Proveri unete podatke.");
       } else {
         setCreateError("Greška pri kreiranju nekretnine. Pokušaj ponovo.");
+      }
+    } finally {
+      setCreateLoading(false);
+    }
+  }
+
+  async function handleUpdate(payloadFromModal) {
+    setCreateError("");
+    setFieldErrors({});
+
+    if (!editingRow?.id) {
+      setCreateError("Nema ID nekretnine za izmenu.");
+      return;
+    }
+
+    // minimalna FE validacija
+    if (!payloadFromModal?.adresa?.trim()) {
+      setFieldErrors({ adresa: "Unesi adresu." });
+      return;
+    }
+    if (payloadFromModal?.cena === "" || Number.isNaN(Number(payloadFromModal?.cena)) || Number(payloadFromModal?.cena) < 0) {
+      setFieldErrors({ cena: "Unesi ispravnu cenu." });
+      return;
+    }
+
+    setCreateLoading(true);
+    try {
+      const finalPayload = {
+        adresa: payloadFromModal.adresa.trim(),
+        tip: payloadFromModal.tip,
+        status: payloadFromModal.status,
+        cena: Number(payloadFromModal.cena),
+        atributi: payloadFromModal.atributi ?? null,
+      };
+
+      await api.put(`/nekretnine/${editingRow.id}`, finalPayload);
+
+      await uploadImagesForNekretnina(editingRow.id, payloadFromModal?.slike ?? []);
+
+      setIsCreateOpen(false);
+      setEditingRow(null);
+      await fetchData();
+    } catch (e2) {
+      const statusCode = e2?.response?.status;
+      const data = e2?.response?.data;
+
+      if (statusCode === 422) {
+        setFieldErrors(normalizeErrors(data));
+        setCreateError("Proveri unete podatke.");
+      } else {
+        setCreateError("Greška pri izmeni nekretnine. Pokušaj ponovo.");
       }
     } finally {
       setCreateLoading(false);
@@ -337,11 +430,17 @@ export default function NekretnineTable() {
             <div className="nek-card-top">
               <div className="nek-card-title">
                 Lista nekretnina{" "}
-                {meta ? <span className="nek-meta">({meta.from}-{meta.to} od {meta.total})</span> : null}
+                {meta ? (
+                  <span className="nek-meta">
+                    ({meta.from}-{meta.to} od {meta.total})
+                  </span>
+                ) : null}
               </div>
 
               <div className="nek-mini">
-                <span className="nek-mini-pill">Sort: {sortLabel} • {sortDir.toUpperCase()}</span>
+                <span className="nek-mini-pill">
+                  Sort: {sortLabel} • {sortDir.toUpperCase()}
+                </span>
                 {loading ? <span className="nek-mini-pill subtle">Učitavanje...</span> : null}
               </div>
             </div>
@@ -379,7 +478,9 @@ export default function NekretnineTable() {
                 <tbody>
                   {!loading && rows.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="nek-empty">Nema rezultata za ovu pretragu.</td>
+                      <td colSpan={7} className="nek-empty">
+                        Nema rezultata za ovu pretragu.
+                      </td>
                     </tr>
                   ) : null}
 
@@ -426,6 +527,17 @@ export default function NekretnineTable() {
                         <td className="nek-actions-cell">
                           <button
                             type="button"
+                            className="nek-iconbtn"
+                            onClick={() => openEdit(r)}
+                            disabled={deletingId === r.id || loading}
+                            title="Izmeni"
+                            style={{ marginRight: 8 }}
+                          >
+                            <FiEdit2 />
+                          </button>
+
+                          <button
+                            type="button"
                             className="nek-iconbtn danger"
                             onClick={() => handleDelete(r.id)}
                             disabled={deletingId === r.id}
@@ -440,7 +552,9 @@ export default function NekretnineTable() {
 
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="nek-loading">Učitavanje...</td>
+                      <td colSpan={7} className="nek-loading">
+                        Učitavanje...
+                      </td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -463,14 +577,16 @@ export default function NekretnineTable() {
           </div>
         </div>
       </section>
- 
+
       <CreateNekretninaModal
         isOpen={isCreateOpen}
         onClose={closeCreate}
-        onSubmit={handleCreate}
+        onSubmit={editingRow ? handleUpdate : handleCreate}
         loading={createLoading}
         error={createError}
         fieldErrors={fieldErrors}
+        mode={editingRow ? "edit" : "create"}
+        initialData={editingRow}
       />
     </div>
   );
