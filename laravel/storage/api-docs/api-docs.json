@@ -1,0 +1,1760 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "CRM Nekretnine API",
+        "description": "API dokumentacija za CRM sistem nekretnina",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registracija korisnika",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ime",
+                                    "prezime",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "uloga"
+                                ],
+                                "properties": {
+                                    "ime": {
+                                        "type": "string",
+                                        "example": "Marko"
+                                    },
+                                    "prezime": {
+                                        "type": "string",
+                                        "example": "Marković"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "marko@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "uloga": {
+                                        "type": "string",
+                                        "enum": [
+                                            "agent",
+                                            "menadzer",
+                                            "administrator"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Uspešna registracija"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Prijava korisnika",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Uspešna prijava"
+                    },
+                    "401": {
+                        "description": "Neispravni kredencijali"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Podaci o trenutno ulogovanom korisniku",
+                "operationId": "8367feff40ba10e43187792cad3132c1",
+                "responses": {
+                    "200": {
+                        "description": "Podaci o korisniku"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Odjava korisnika",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Uspešna odjava"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/kupci": {
+            "get": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Lista kupaca",
+                "operationId": "1972846269edf52a0953501fb90ca9e4",
+                "responses": {
+                    "200": {
+                        "description": "Lista kupaca",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Kupac"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Kreiranje kupca",
+                "operationId": "cc2c641b357454ba6e866fdbbc21bc5e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ime",
+                                    "prezime"
+                                ],
+                                "properties": {
+                                    "ime": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Ana"
+                                    },
+                                    "prezime": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Anić"
+                                    },
+                                    "telefon": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "+381641112223",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "ana@email.com",
+                                        "nullable": true
+                                    },
+                                    "budzet": {
+                                        "type": "number",
+                                        "example": 80000,
+                                        "nullable": true
+                                    },
+                                    "lokacija": {
+                                        "type": "string",
+                                        "maxLength": 120,
+                                        "example": "Beograd",
+                                        "nullable": true
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Traži 2-soban stan, blizu centra",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Kupac kreiran",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Kupac"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/kupci/{id}": {
+            "get": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Detalji kupca",
+                "operationId": "f5927e5da62a0c7cc3fcd568fc985431",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kupac",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Kupac"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kupac nije pronađen"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Izmena kupca",
+                "operationId": "1c2aa0d7289bebe9b272a7c20a076fae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "ime": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Ana",
+                                        "nullable": true
+                                    },
+                                    "prezime": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Anić",
+                                        "nullable": true
+                                    },
+                                    "telefon": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "+381641112223",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "maxLength": 255,
+                                        "example": "ana@email.com",
+                                        "nullable": true
+                                    },
+                                    "budzet": {
+                                        "type": "number",
+                                        "example": 90000,
+                                        "nullable": true
+                                    },
+                                    "lokacija": {
+                                        "type": "string",
+                                        "maxLength": 120,
+                                        "example": "Novi Sad",
+                                        "nullable": true
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Prioritet: parking",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Kupac izmenjen",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Kupac"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kupac nije pronađen"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Brisanje kupca",
+                "operationId": "51890156eef357f5099a15877d9d824d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kupac obrisan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kupac obrisan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Kupac nije pronađen"
+                    }
+                }
+            }
+        },
+        "/api/kupci/search": {
+            "get": {
+                "tags": [
+                    "Kupci"
+                ],
+                "summary": "Pretraga kupaca (paginacija + sortiranje)",
+                "description": "Primer: /api/kupci/search?q=...&page=1&per_page=10&sort_by=prezime&sort_dir=asc",
+                "operationId": "d86310dddc980975e8b2c99a822acd87",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 10
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ime",
+                                "prezime",
+                                "email",
+                                "telefon",
+                                "budzet",
+                                "lokacija",
+                                "created_at"
+                            ]
+                        },
+                        "example": "prezime"
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "asc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginirani rezultati",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Kupac"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/nekretnine": {
+            "get": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Lista nekretnina (sa slikama)",
+                "operationId": "ef589a74e522b349b88763f877955289",
+                "responses": {
+                    "200": {
+                        "description": "Lista nekretnina",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Nekretnina"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Kreiranje nekretnine",
+                "operationId": "0dbb59922ce448930cf3a1ee7348a20e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "adresa",
+                                    "tip",
+                                    "cena"
+                                ],
+                                "properties": {
+                                    "adresa": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Bulevar Oslobođenja 12, Novi Sad"
+                                    },
+                                    "tip": {
+                                        "type": "string",
+                                        "maxLength": 80,
+                                        "example": "stan"
+                                    },
+                                    "cena": {
+                                        "type": "number",
+                                        "example": 95000
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "dostupna",
+                                        "nullable": true
+                                    },
+                                    "atributi": {
+                                        "type": "object",
+                                        "example": {
+                                            "kvadratura": "55",
+                                            "sprat": "3",
+                                            "grejanje": "CG"
+                                        },
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Nekretnina kreirana",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Nekretnina"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/nekretnine/{id}": {
+            "get": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Detalji nekretnine (sa slikama)",
+                "operationId": "ba14ce9fc161d79a9055106894b4ff6f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nekretnina",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Nekretnina"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Nekretnina nije pronađena"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Izmena nekretnine",
+                "operationId": "a796b4894cfa5e0ddc2750deb32ba7db",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "adresa": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Cara Dušana 8, Beograd",
+                                        "nullable": true
+                                    },
+                                    "tip": {
+                                        "type": "string",
+                                        "maxLength": 80,
+                                        "example": "kuca",
+                                        "nullable": true
+                                    },
+                                    "cena": {
+                                        "type": "number",
+                                        "example": 125000,
+                                        "nullable": true
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "rezervisana",
+                                        "nullable": true
+                                    },
+                                    "atributi": {
+                                        "type": "object",
+                                        "example": {
+                                            "kvadratura": "120",
+                                            "parking": "da"
+                                        },
+                                        "nullable": true,
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nekretnina izmenjena",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Nekretnina"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Nekretnina nije pronađena"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Brisanje nekretnine",
+                "operationId": "5deb554c8c3351ba153f9b4ce30357d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nekretnina obrisana",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Nekretnina obrisana"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Nekretnina nije pronađena"
+                    }
+                }
+            }
+        },
+        "/api/nekretnine/search": {
+            "get": {
+                "tags": [
+                    "Nekretnine"
+                ],
+                "summary": "Pretraga nekretnina (filter + paginacija + sortiranje)",
+                "description": "Primer: /api/nekretnine/search?q=...&page=1&per_page=10&sort_by=adresa&sort_dir=asc&status=dostupna&tip=stan",
+                "operationId": "133767be05f9eb2a2fc42e8ba0b93d86",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 150
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 10
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 50
+                        },
+                        "example": "dostupna"
+                    },
+                    {
+                        "name": "tip",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 80
+                        },
+                        "example": "stan"
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "adresa",
+                                "tip",
+                                "cena",
+                                "status",
+                                "created_at"
+                            ]
+                        },
+                        "example": "created_at"
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "desc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginirani rezultati",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Nekretnina"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/ponude": {
+            "get": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Lista ponuda",
+                "operationId": "b528624c0de596e8a685a2cc9660736f",
+                "responses": {
+                    "200": {
+                        "description": "Lista ponuda"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Kreiranje ponude",
+                "operationId": "980b2e183efa678f579dfdbace0cf083",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kupac_id",
+                                    "nekretnina_id",
+                                    "cena",
+                                    "datum"
+                                ],
+                                "properties": {
+                                    "kupac_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nekretnina_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "cena": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 120000
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "u_toku"
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Kupac nudi 120k, traži brzu realizaciju."
+                                    },
+                                    "datum": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-25"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ponuda kreirana"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/ponude/{id}": {
+            "get": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Prikaz ponude po ID-u",
+                "operationId": "c76d25874e7dfe3ecb68e0b4e8d251bd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ponude",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalji ponude"
+                    },
+                    "404": {
+                        "description": "Ponuda nije pronađena"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Izmena ponude",
+                "operationId": "b7ded6ddf1106b70cd0dfc84c8c3ef06",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ponude",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kupac_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nekretnina_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "cena": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 125000
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "prihvacena"
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Dogovoreno na 125k."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ponuda izmenjena"
+                    },
+                    "404": {
+                        "description": "Ponuda nije pronađena"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Brisanje ponude",
+                "operationId": "56385728c698a44d9c7adb15dc07e28a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID ponude",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ponuda obrisana"
+                    },
+                    "404": {
+                        "description": "Ponuda nije pronađena"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/ponude/search": {
+            "get": {
+                "tags": [
+                    "Ponude"
+                ],
+                "summary": "Pretraga ponuda",
+                "operationId": "290884f5bc8a1c3c2c513b5346681d74",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Tekst pretrage (status/napomena)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "u_toku"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Broj strane",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Broj stavki po strani",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 10
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "u_toku"
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Polje za sortiranje",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "cena",
+                                "status",
+                                "kupac_id",
+                                "nekretnina_id"
+                            ]
+                        },
+                        "example": "created_at"
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "description": "Smer sortiranja",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "desc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginirani rezultat pretrage"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pregledi": {
+            "get": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Lista pregleda",
+                "operationId": "c0c7a15891f04be9a6e2e63dc8f816de",
+                "responses": {
+                    "200": {
+                        "description": "Lista pregleda"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Kreiranje pregleda",
+                "operationId": "6cb402b5820ff5de9b2f6e04b7e325c3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kupac_id",
+                                    "nekretnina_id",
+                                    "datum"
+                                ],
+                                "properties": {
+                                    "kupac_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nekretnina_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "datum": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-25"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "zakazan"
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Kupac želi obilazak popodne."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pregled kreiran"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pregledi/{id}": {
+            "get": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Prikaz pregleda po ID-u",
+                "operationId": "38b85547538f306d00fe37ada7080d88",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pregleda",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalji pregleda"
+                    },
+                    "404": {
+                        "description": "Pregled nije pronađen"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Izmena pregleda",
+                "operationId": "c8f0b01e67f3097783ef167761e9dcfd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pregleda",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kupac_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "nekretnina_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "datum": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-02-26"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "odrzan"
+                                    },
+                                    "napomena": {
+                                        "type": "string",
+                                        "example": "Pregled uspešno obavljen."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pregled izmenjen"
+                    },
+                    "404": {
+                        "description": "Pregled nije pronađen"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Brisanje pregleda",
+                "operationId": "ca7d1a776098e10d3471dda83095c792",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID pregleda",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pregled obrisan"
+                    },
+                    "404": {
+                        "description": "Pregled nije pronađen"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pregledi/search": {
+            "get": {
+                "tags": [
+                    "Pregledi"
+                ],
+                "summary": "Pretraga pregleda",
+                "operationId": "5017a051e3be3884b8919a8f4d3cbabf",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Tekst pretrage (status/napomena)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "zakazan"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Broj strane",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Broj stavki po strani",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 10
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "zakazan"
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Polje za sortiranje",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "datum",
+                                "status",
+                                "kupac_id",
+                                "nekretnina_id"
+                            ]
+                        },
+                        "example": "datum"
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "description": "Smer sortiranja",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "desc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginirani rezultat pretrage"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/ping": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Ping endpoint",
+                "description": "Test endpoint da Swagger generisanje proradi",
+                "operationId": "e54d4083dcb2d62eb808c4261fbbace3",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Kupac": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "ime": {
+                        "type": "string",
+                        "example": "Ana"
+                    },
+                    "prezime": {
+                        "type": "string",
+                        "example": "Anić"
+                    },
+                    "telefon": {
+                        "type": "string",
+                        "example": "+381641112223",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ana@email.com",
+                        "nullable": true
+                    },
+                    "budzet": {
+                        "type": "number",
+                        "example": 80000,
+                        "nullable": true
+                    },
+                    "lokacija": {
+                        "type": "string",
+                        "example": "Beograd",
+                        "nullable": true
+                    },
+                    "napomena": {
+                        "type": "string",
+                        "example": "Traži 2-soban stan",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Nekretnina": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "adresa": {
+                        "type": "string",
+                        "example": "Bulevar Oslobođenja 12, Novi Sad"
+                    },
+                    "tip": {
+                        "type": "string",
+                        "example": "stan"
+                    },
+                    "cena": {
+                        "type": "number",
+                        "example": 95000
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "dostupna",
+                        "nullable": true
+                    },
+                    "atributi": {
+                        "type": "object",
+                        "example": {
+                            "kvadratura": "55",
+                            "sprat": "3"
+                        },
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "slike": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NekretninaSlika"
+                        },
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "NekretninaSlika": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "nekretnina_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "putanja": {
+                        "type": "string",
+                        "example": "uploads/nekretnine/1/slika1.jpg"
+                    },
+                    "istaknuta": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "redosled": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Kupci",
+            "description": "Kupci"
+        },
+        {
+            "name": "Nekretnine",
+            "description": "Nekretnine"
+        },
+        {
+            "name": "Ponude",
+            "description": "Ponude"
+        },
+        {
+            "name": "Pregledi",
+            "description": "Pregledi"
+        },
+        {
+            "name": "System",
+            "description": "System"
+        }
+    ]
+}

@@ -11,6 +11,10 @@ use App\Http\Controllers\Api\AktivnostController;
 use App\Http\Controllers\Api\SlikaController;
 use App\Http\Controllers\Api\UserAdminController;
 use App\Http\Controllers\Api\AgentDashboardController;
+//test ruta za swagger
+use App\Http\Controllers\SwaggerPingController;
+
+Route::get('/ping', [SwaggerPingController::class, 'ping']);
 
 /*
 |--------------------------------------------------------------------------

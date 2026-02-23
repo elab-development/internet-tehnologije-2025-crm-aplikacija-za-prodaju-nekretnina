@@ -7,13 +7,34 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
-    /**
-     * POST /api/register
-     * Body: ime, prezime, email, password, password_confirmation, uloga
-     */
+    #[OA\Post(
+        path: "/api/register",
+        summary: "Registracija korisnika",
+        tags: ["Auth"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["ime","prezime","email","password","password_confirmation","uloga"],
+                properties: [
+                    new OA\Property(property: "ime", type: "string", example: "Marko"),
+                    new OA\Property(property: "prezime", type: "string", example: "Marković"),
+                    new OA\Property(property: "email", type: "string", format: "email", example: "marko@email.com"),
+                    new OA\Property(property: "password", type: "string", example: "123456"),
+                    new OA\Property(property: "password_confirmation", type: "string", example: "123456"),
+                    new OA\Property(property: "uloga", type: "string", enum: ["agent","menadzer","administrator"])
+                ],
+                type: "object"
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Uspešna registracija"),
+            new OA\Response(response: 422, description: "Validaciona greška")
+        ]
+    )]
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -39,32 +60,42 @@ class AuthController extends Controller
             'uloga' => $request->uloga,
         ]);
 
-        // odmah izdaj token (da se korisnik odmah uloguje)
         $token = $user->createToken('crm-api')->plainTextToken;
 
         return response()->json([
             'message' => 'Korisnik je uspešno registrovan.',
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'ime' => $user->ime,
-                'prezime' => $user->prezime,
-                'email' => $user->email,
-                'uloga' => $user->uloga,
-            ],
+            'user' => $user
         ], 201);
     }
 
-    /**
-     * POST /api/login
-     * Body: email, password
-     */
+    #[OA\Post(
+        path: "/api/login",
+        summary: "Prijava korisnika",
+        tags: ["Auth"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email","password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email"),
+                    new OA\Property(property: "password", type: "string")
+                ],
+                type: "object"
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Uspešna prijava"),
+            new OA\Response(response: 401, description: "Neispravni kredencijali"),
+            new OA\Response(response: 422, description: "Validaciona greška")
+        ]
+    )]
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:6'],
-        ] );
+        ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -78,51 +109,43 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Pogrešan email ili lozinka.',
-                'errors' => [
-                    'email' => ['Neispravni kredencijali.']
-                ],
             ], 401);
         }
-
-        // opcionalno: jedna aktivna sesija po korisniku
-        // $user->tokens()->delete();
 
         $token = $user->createToken('crm-api')->plainTextToken;
 
         return response()->json([
             'message' => 'Uspešna prijava.',
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'ime' => $user->ime,
-                'prezime' => $user->prezime,
-                'email' => $user->email,
-                'uloga' => $user->uloga,
-            ],
+            'user' => $user
         ]);
     }
 
-    /**
-     * GET /api/me
-     * Header: Authorization: Bearer <token>
-     */
+    #[OA\Get(
+        path: "/api/me",
+        summary: "Podaci o trenutno ulogovanom korisniku",
+        tags: ["Auth"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Podaci o korisniku"),
+            new OA\Response(response: 401, description: "Unauthorized")
+        ]
+    )]
     public function me(Request $request)
     {
-        $user = $request->user();
-
-        return response()->json([
-            'id' => $user->id,
-            'ime' => $user->ime,
-            'prezime' => $user->prezime,
-            'email' => $user->email,
-            'uloga' => $user->uloga,
-        ]);
+        return response()->json($request->user());
     }
 
-    /**
-     * POST /api/logout
-     * Header: Authorization: Bearer <token>
-     */
+    #[OA\Post(
+        path: "/api/logout",
+        summary: "Odjava korisnika",
+        tags: ["Auth"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Uspešna odjava"),
+            new OA\Response(response: 401, description: "Unauthorized")
+        ]
+    )]
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
