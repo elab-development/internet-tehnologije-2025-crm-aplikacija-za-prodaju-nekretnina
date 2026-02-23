@@ -15,7 +15,7 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
   const [form, setForm] = useState({
     kupac_id: "",
     nekretnina_id: "",
-    datum_vreme: "",
+    datum: "",
     status: "zakazan",
     napomena: "",
   });
@@ -34,7 +34,6 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
   useEffect(() => {
     if (!isOpen) return;
 
-    // default datum_vreme = sada + 1h (za UX)
     const d = new Date(Date.now() + 60 * 60 * 1000);
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -46,7 +45,7 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
     setForm({
       kupac_id: "",
       nekretnina_id: "",
-      datum_vreme: dt,
+      datum: dt,
       status: "zakazan",
       napomena: "",
     });
@@ -83,7 +82,7 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
         if (!alive) return;
         setKupci(k);
         setNekretnine(n);
-      } catch (e) {
+      } catch {
         if (!alive) return;
         setListsErr("Greška pri učitavanju kupaca/nekretnina (proveri auth token i rute).");
         setKupci([]);
@@ -224,12 +223,12 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
                 Datum i vreme *
                 <input
                   type="datetime-local"
-                  className={`pregledi-input ${fieldErrors?.datum_vreme ? "is-error" : ""}`}
-                  value={form.datum_vreme}
-                  onChange={(e) => setForm((f) => ({ ...f, datum_vreme: e.target.value }))}
+                  className={`pregledi-input ${fieldErrors?.datum ? "is-error" : ""}`}
+                  value={form.datum}
+                  onChange={(e) => setForm((f) => ({ ...f, datum: e.target.value }))}
                   disabled={loading}
                 />
-                {fieldErrors?.datum_vreme ? <div className="pregledi-field-error">{fieldErrors.datum_vreme}</div> : null}
+                {fieldErrors?.datum ? <div className="pregledi-field-error">{fieldErrors.datum}</div> : null}
               </label>
 
               <label className="pregledi-label">
@@ -265,13 +264,7 @@ export default function CreatePregledModal({ isOpen, onClose, onSubmit, loading,
                 Otkaži
               </button>
               <button className="pregledi-btn primary" type="submit" disabled={loading || loadingLists}>
-                {loading ? (
-                  "Čuvanje..."
-                ) : (
-                  <>
-                    Sačuvaj <FiSave />
-                  </>
-                )}
+                {loading ? "Čuvanje..." : <>Sačuvaj <FiSave /></>}
               </button>
             </div>
           </form>

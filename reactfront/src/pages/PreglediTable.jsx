@@ -15,19 +15,17 @@ import {
 import CreatePregledModal from "../components/CreatePregledModal";
 
 const SORTABLE = [
-  { key: "datum_vreme", label: "Datum/Vreme" },
+  { key: "datum", label: "Datum/Vreme" },
   { key: "status", label: "Status" },
-  { key: "kupac_id", label: "KupacID" },
-  { key: "nekretnina_id", label: "NekretninaID" },
+  { key: "kupac_id", label: "Kupac" },
+  { key: "nekretnina_id", label: "Nekretnina" },
   { key: "created_at", label: "Kreirano" },
 ];
 
 function fmtDateTime(v) {
   if (!v) return "—";
   const s = String(v);
-  // ISO "2026-02-08T17:57:13.000000Z" -> "2026-02-08 17:57"
   if (s.includes("T")) return s.replace("T", " ").slice(0, 16);
-  // "2026-02-08 17:57:00" -> "2026-02-08 17:57"
   return s.slice(0, 16);
 }
 
@@ -58,7 +56,7 @@ export default function PreglediTable() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const [sortBy, setSortBy] = useState("datum_vreme");
+  const [sortBy, setSortBy] = useState("datum");
   const [sortDir, setSortDir] = useState("desc");
 
   const [status, setStatus] = useState("");
@@ -68,10 +66,8 @@ export default function PreglediTable() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  // brisanje
   const [deletingId, setDeletingId] = useState(null);
 
-  // create modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState("");
@@ -151,7 +147,7 @@ export default function PreglediTable() {
       const willBeEmpty = rows.length === 1 && (meta?.current_page ?? page) > 1;
       if (willBeEmpty) setPage((p) => Math.max(1, p - 1));
       else await fetchData();
-    } catch (e3) {
+    } catch {
       setErr("Greška pri brisanju pregleda.");
     } finally {
       setDeletingId(null);
@@ -173,11 +169,10 @@ export default function PreglediTable() {
     setCreateError("");
     setFieldErrors({});
 
-    // FE validacija
     const fe = {};
     if (!payloadFromModal?.kupac_id) fe.kupac_id = "Izaberi kupca.";
     if (!payloadFromModal?.nekretnina_id) fe.nekretnina_id = "Izaberi nekretninu.";
-    if (!payloadFromModal?.datum_vreme) fe.datum_vreme = "Izaberi datum i vreme.";
+    if (!payloadFromModal?.datum) fe.datum = "Izaberi datum i vreme.";
 
     if (Object.keys(fe).length) {
       setFieldErrors(fe);
@@ -189,11 +184,9 @@ export default function PreglediTable() {
       const finalPayload = {
         kupac_id: Number(payloadFromModal.kupac_id),
         nekretnina_id: Number(payloadFromModal.nekretnina_id),
-        datum_vreme: payloadFromModal.datum_vreme, // "YYYY-MM-DDTHH:mm"
+        datum: payloadFromModal.datum, // "YYYY-MM-DDTHH:mm"
         status: payloadFromModal.status || "zakazan",
         napomena: payloadFromModal.napomena || null,
-        // ako želiš da upišeš ko je zakazao:
-        // korisnik_id: (JSON.parse(localStorage.getItem("auth_user")||"null")?.id)  // samo ako backend očekuje
       };
 
       await api.post("/pregledi", finalPayload);
@@ -300,7 +293,12 @@ export default function PreglediTable() {
           <div className="pregledi-card crm-glass">
             <div className="pregledi-card-top">
               <div className="pregledi-card-title">
-                Lista pregleda {meta ? <span className="pregledi-meta">({meta.from}-{meta.to} od {meta.total})</span> : null}
+                Lista pregleda{" "}
+                {meta ? (
+                  <span className="pregledi-meta">
+                    ({meta.from}-{meta.to} od {meta.total})
+                  </span>
+                ) : null}
               </div>
 
               <div className="pregledi-mini">
@@ -323,8 +321,8 @@ export default function PreglediTable() {
                     <th onClick={() => toggleSort("nekretnina_id")} className="is-sort">
                       Nekretnina {sortBy === "nekretnina_id" ? <SortMark dir={sortDir} /> : null}
                     </th>
-                    <th onClick={() => toggleSort("datum_vreme")} className="is-sort">
-                      Datum/Vreme {sortBy === "datum_vreme" ? <SortMark dir={sortDir} /> : null}
+                    <th onClick={() => toggleSort("datum")} className="is-sort">
+                      Datum/Vreme {sortBy === "datum" ? <SortMark dir={sortDir} /> : null}
                     </th>
                     <th onClick={() => toggleSort("status")} className="is-sort">
                       Status {sortBy === "status" ? <SortMark dir={sortDir} /> : null}
@@ -346,49 +344,61 @@ export default function PreglediTable() {
                     </tr>
                   ) : null}
 
-                  {rows.map((r) => (
-                    <tr key={r.id}>
-                      <td>
-                        <div className="pregledi-main">
-                          <FiCalendar className="pregledi-ic" />
-                          <div className="pregledi-id" title={`KupacID: ${r.kupac_id ?? "—"}`}>
-                            {r.kupac_full || r.kupac_ime_prezime || r.kupac_id || "—"}
+                  {rows.map((r) => {
+                    const kupacName =
+                      (r?.kupac ? `${r.kupac.ime ?? ""} ${r.kupac.prezime ?? ""}`.trim() : "") || `#${r.kupac_id ?? "—"}`;
+
+                    const nekAdresa = r?.nekretnina?.adresa || `#${r.nekretnina_id ?? "—"}`;
+                    const nekTip = r?.nekretnina?.tip || "";
+                    const nekStatus = r?.nekretnina?.status || "";
+
+                    return (
+                      <tr key={r.id}>
+                        <td>
+                          <div className="pregledi-main">
+                            <FiCalendar className="pregledi-ic" />
+                            <div className="pregledi-id" title={`KupacID: ${r.kupac_id ?? "—"}`}>
+                              {kupacName}
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td title={`NekretninaID: ${r.nekretnina_id ?? "—"}`}>
-                        <div className="pregledi-nek">
-                          <div className="pregledi-nek-addr">{r.nekretnina_adresa || r.nekretnina_naziv || r.nekretnina_id || "—"}</div>
-                          <div className="pregledi-nek-tip">{r.nekretnina_tip ? String(r.nekretnina_tip) : ""}</div>
-                        </div>
-                      </td>
+                        <td title={`NekretninaID: ${r.nekretnina_id ?? "—"}`}>
+                          <div className="pregledi-nek">
+                            <div className="pregledi-nek-addr">{nekAdresa}</div>
+                            <div className="pregledi-nek-tip">
+                              {nekTip}
+                              {nekTip && nekStatus ? " • " : ""}
+                              {nekStatus}
+                            </div>
+                          </div>
+                        </td>
 
-                      <td className="pregledi-dt">{fmtDateTime(r.datum_vreme)}</td>
+                        <td className="pregledi-dt">{fmtDateTime(r.datum)}</td>
 
-                      <td className="pregledi-pillcol">
-                        <span className={`pregledi-pill pregledi-pill-${(r.status || "").toString().toLowerCase()}`}>
-                          {(r.status || "—").toString()}
-                        </span>
-                      </td>
+                        <td className="pregledi-pillcol">
+                          <span className={`pregledi-pill pregledi-pill-${(r.status || "").toString().toLowerCase()}`}>
+                            {(r.status || "—").toString()}
+                          </span>
+                        </td>
 
-                      <td className="hide-md">{r.napomena || "—"}</td>
+                        <td className="hide-md">{r.napomena || "—"}</td>
+                        <td className="hide-md">{r.created_at ? fmtDateTime(r.created_at) : "—"}</td>
 
-                      <td className="hide-md">{r.created_at ? fmtDateTime(r.created_at) : "—"}</td>
-
-                      <td className="pregledi-actions-cell">
-                        <button
-                          type="button"
-                          className="pregledi-iconbtn danger"
-                          onClick={() => handleDelete(r.id)}
-                          disabled={deletingId === r.id}
-                          title="Obriši"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="pregledi-actions-cell">
+                          <button
+                            type="button"
+                            className="pregledi-iconbtn danger"
+                            onClick={() => handleDelete(r.id)}
+                            disabled={deletingId === r.id}
+                            title="Obriši"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
 
                   {loading ? (
                     <tr>

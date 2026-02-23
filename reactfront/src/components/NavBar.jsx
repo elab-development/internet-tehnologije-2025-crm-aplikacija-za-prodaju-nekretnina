@@ -1,4 +1,3 @@
- 
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -11,18 +10,10 @@ import {
   FiGrid,
   FiUsers,
   FiMap,
-  FiCalendar,         
+  FiCalendar,
+  FiSettings,
 } from "react-icons/fi";
-
-/**
- * Pravila:
- * - Ako NIJE ulogovan: Pocetna + Login
- * - Ako JESTE ulogovan: AgentDashboard + Kupci + Nekretnine + Logout
- *
- * Auth storage:
- * - localStorage auth_token
- * - localStorage auth_user (JSON)
- */
+ 
 export default function NavBar() {
   const navigate = useNavigate();
 
@@ -30,7 +21,6 @@ export default function NavBar() {
   const [user, setUser] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // prati promene localStorage (npr. login na drugoj tab strani ili ručno setovanje)
   useEffect(() => {
     const sync = () => {
       const token = localStorage.getItem("auth_token");
@@ -46,7 +36,6 @@ export default function NavBar() {
     };
     window.addEventListener("storage", onStorage);
 
-    // custom event (vidi Login ispod: window.dispatchEvent(new Event("auth:changed")))
     const onAuthChanged = () => sync();
     window.addEventListener("auth:changed", onAuthChanged);
 
@@ -56,42 +45,60 @@ export default function NavBar() {
     };
   }, []);
 
+  const role = (user?.uloga || user?.role || "").toLowerCase();
+
   const links = useMemo(() => {
+    // GOST
     if (!isAuthed) {
       return [
         { to: "/", label: "Početna", icon: <FiHome /> },
+        { to: "/ponuda-nekretnina", label: "Ponuda nekretnina", icon: <FiGrid /> },
+        // ako hoćeš da i gost može listu nekretnina da vidi:
+        { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
         { to: "/login", label: "Login", icon: <FiLogIn /> },
       ];
     }
+
+    // ADMIN
+    if (role === "administrator" || role === "admin") {
+      return [
+        { to: "/admin", label: "Admin dashboard", icon: <FiSettings /> },
+        { to: "/kupci", label: "Kupci", icon: <FiUsers /> },
+        { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
+        { to: "/ponude", label: "Ponude", icon: <FiGrid /> },
+      ];
+    }
+
+    // AGENT
+    if (role === "agent") {
+      return [
+        { to: "/agent", label: "Agent dashboard", icon: <FiGrid /> },
+        { to: "/kupci", label: "Kupci", icon: <FiUsers /> },
+        { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
+        { to: "/ponude", label: "Ponude", icon: <FiGrid /> },
+        { to: "/pregledi", label: "Pregledi", icon: <FiCalendar /> },
+      ];
+    }
+
+    // fallback za ostale role (ako se pojavi menadzer npr.)
     return [
-      { to: "/agent", label: "Agent dashboard", icon: <FiGrid /> },
-      { to: "/kupci", label: "Kupci", icon: <FiUsers /> },
+      { to: "/", label: "Početna", icon: <FiHome /> },
       { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
-      { to: "/ponude", label: "Ponude", icon: <FiMap /> },
-      { to: "/pregledi", label: "Pregledi", icon: <FiCalendar /> },
-      { to: "/ponuda-nekretnina", label: "Ponuda nekretnina", icon: <FiGrid /> },
-
-
+      { to: "/ponude", label: "Ponude", icon: <FiGrid /> },
     ];
-  }, [isAuthed]);
+  }, [isAuthed, role]);
 
   async function handleLogout() {
     if (loggingOut) return;
     setLoggingOut(true);
 
     try {
-      // backend logout (ako ga imate)
-      // Ako nemate /logout rutu, ostavi try/catch, ali bar očisti localStorage.
       await api.post("/logout");
     } catch {
-      // ignoriši – i dalje radimo lokalni logout
     } finally {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
-
-      // obavesti app da se auth promenio
       window.dispatchEvent(new Event("auth:changed"));
-
       setLoggingOut(false);
       navigate("/login");
     }
@@ -101,10 +108,10 @@ export default function NavBar() {
     <header className="crm-nav">
       <div className="crm-container crm-nav-inner">
         <Link to="/" className="crm-nav-brand" aria-label="CRM Home">
-        <span className="crm-nav-logo" aria-hidden="true">
-            <LuBuilding2  />  
-        </span>
-        <span className="crm-nav-title">CRM</span>
+          <span className="crm-nav-logo" aria-hidden="true">
+            <LuBuilding2 />
+          </span>
+          <span className="crm-nav-title">CRM</span>
         </Link>
 
         <nav className="crm-nav-links" aria-label="Primary">
@@ -144,8 +151,7 @@ function safeJson(s) {
 }
 
 function remindUser(user, loggingOut, handleLogout) {
-  const name =
-    user?.ime || user?.name || user?.email || "Korisnik";
+  const name = user?.ime || user?.name || user?.email || "Korisnik";
 
   return (
     <>
