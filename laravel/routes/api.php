@@ -69,10 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('uloga:administrator')->group(function () {
         Route::get('/admin', fn () => 'Admin ruta');
 
-        Route::get('/admin/users/search',         [UserAdminController::class, 'search']);
-        Route::get('/admin/users/stats',          [UserAdminController::class, 'stats']);
-        Route::delete('/admin/users/{id}',        [UserAdminController::class, 'destroy']); // soft delete
-        Route::post('/admin/users/{id}/restore',  [UserAdminController::class, 'restore']);
+        Route::get('/admin/users/search',        [UserAdminController::class, 'search']);
+        Route::get('/admin/users/stats',         [UserAdminController::class, 'stats']);
+        Route::post('/admin/users',              [UserAdminController::class, 'store']);   // <-- OVO FALILO
+        Route::delete('/admin/users/{id}',       [UserAdminController::class, 'destroy']);
+        Route::post('/admin/users/{id}/restore', [UserAdminController::class, 'restore']);
     });
 
     /*

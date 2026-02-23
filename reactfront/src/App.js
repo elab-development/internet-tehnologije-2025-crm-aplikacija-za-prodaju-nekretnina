@@ -11,6 +11,7 @@ import PonudeTable from './pages/PonudeTable';
 import PreglediTable from './pages/PreglediTable';
 import NekretnineListPage from './pages/NekretnineListPage';
 import NekretninaDetailsPage from './pages/NekretninaDetailsPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -29,6 +30,9 @@ function App() {
 
        <Route path="/ponuda-nekretnina" element={<NekretnineListPage />} />
       <Route path="/ponuda-nekretnina/:id" element={<NekretninaDetailsPage />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+
+
       
     </Routes>
      

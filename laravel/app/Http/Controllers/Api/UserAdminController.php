@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 class UserAdminController extends Controller
@@ -59,6 +60,46 @@ class UserAdminController extends Controller
             'deleted' => User::onlyTrashed()->count(),
             'by_role' => User::selectRaw('uloga, COUNT(*) as cnt')->groupBy('uloga')->get(),
         ]);
+    }
+
+    // POST /api/admin/users
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ime' => ['required', 'string', 'max:100'],
+            'prezime' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'uloga' => ['required', 'in:agent,menadzer,administrator'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validacija nije prošla.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::create([
+            'ime' => $request->ime,
+            'prezime' => $request->prezime,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'uloga' => $request->uloga,
+        ]);
+
+        return response()->json([
+            'message' => 'Korisnik je uspešno dodat.',
+            'user' => [
+                'id' => $user->id,
+                'ime' => $user->ime,
+                'prezime' => $user->prezime,
+                'email' => $user->email,
+                'uloga' => $user->uloga,
+                'deleted_at' => $user->deleted_at,
+                'created_at' => $user->created_at,
+            ],
+        ], 201);
     }
 
     // DELETE (soft) /api/admin/users/{id}
