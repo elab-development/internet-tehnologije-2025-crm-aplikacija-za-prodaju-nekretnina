@@ -100,8 +100,7 @@ export default function AgentDashboard() {
   }
 
   useEffect(() => {
-    fetchDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchDashboard(); 
   }, []);
 
   // --------- CHART DATA (preformat) ----------
@@ -129,7 +128,7 @@ export default function AgentDashboard() {
     }));
   }, [charts.viewingsByDay]);
 
-  // boje (ne hardcode fancy, ali moramo nešto da se vidi)
+ 
   const PIE_COLORS = ["#6D9EEB", "#93C47D", "#F6B26B", "#E06666", "#8E7CC3"];
 
   return (
