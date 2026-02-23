@@ -87,7 +87,7 @@ export default function NekretnineListPage() {
 
             <div className="nek-actions">
               <div className="nek-search">
-                <span className="nek-search-ic">🔎</span>
+                <span className="nek-search-ic"></span>
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Pretraga (adresa, tip, status)..." />
               </div>
 

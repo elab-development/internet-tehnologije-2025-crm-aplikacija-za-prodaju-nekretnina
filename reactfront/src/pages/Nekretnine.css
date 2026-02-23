@@ -1,17 +1,22 @@
 /* =========================
    Nekretnine.css (light lux)
+   - koristi se za NekretnineListPage + detalje + modal/lightbox
+   - NE SME da utiče na NekretnineTable (zato sve za listu scope-ujemo na .nek-outer)
    ========================= */
 
 .nek-outer { }
 
-/* HERO */
-.nek-hero{
+/* =========================
+   HERO (LISTA)
+   ========================= */
+
+.nek-outer .nek-hero{
   position: relative;
   padding: 44px 0 18px;
   isolation: isolate;
 }
 
-.nek-bg{
+.nek-outer .nek-bg{
   position:absolute;
   inset: 0;
   z-index: 0;
@@ -22,20 +27,39 @@
     radial-gradient(900px 520px at 50% 110%, rgba(15,23,42,0.08), transparent 62%);
 }
 
-.nek-head{
+/* Poravnaj hero container sa gridom (samo na list strani) */
+.nek-outer .nek-hero .container{
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+@media (max-width: 1100px){
+  .nek-outer .nek-hero .container{ width: min(920px, 100%); }
+}
+@media (max-width: 720px){
+  .nek-outer .nek-hero .container{ width: min(520px, 100%); padding: 0 10px; }
+}
+
+.nek-outer .nek-head{
   position: relative;
   z-index: 1;
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
   gap: 18px;
+  width: 100%;
 }
 
 @media (max-width: 980px){
-  .nek-head{ flex-direction:column; align-items:flex-start; }
+  .nek-outer .nek-head{ flex-direction:column; align-items:flex-start; }
 }
 
-.nek-badge{
+.nek-outer .nek-head > div:first-child{
+  max-width: 760px;
+}
+
+.nek-outer .nek-badge{
   display:inline-flex;
   gap: 10px;
   align-items:center;
@@ -47,7 +71,7 @@
   font-size: 13px;
 }
 
-.nek-dot{
+.nek-outer .nek-dot{
   width: 10px;
   height: 10px;
   border-radius: 99px;
@@ -55,14 +79,14 @@
   box-shadow: 0 10px 28px rgba(201,162,39,0.18);
 }
 
-.nek-title{
+.nek-outer .nek-title{
   margin: 14px 0 8px;
   font-size: clamp(30px, 3.2vw, 44px);
   line-height: 1.08;
   letter-spacing: -0.6px;
 }
 
-.nek-subtitle{
+.nek-outer .nek-subtitle{
   margin: 0;
   color: var(--muted);
   font-size: 15px;
@@ -74,7 +98,7 @@
   align-items:center;
 }
 
-.nek-inline-pill{
+.nek-outer .nek-inline-pill{
   display:inline-flex;
   align-items:center;
   padding: 6px 10px;
@@ -85,17 +109,17 @@
   font-size: 12px;
   font-weight: 800;
 }
-.nek-inline-pill.strong{ font-weight: 900; }
+.nek-outer .nek-inline-pill.strong{ font-weight: 900; }
 
-.nek-actions{
+.nek-outer .nek-actions{
   display:flex;
   gap: 10px;
   flex-wrap: wrap;
   align-items:center;
 }
 
-/* Controls (search + select + buttons) */
-.nek-search{
+/* Controls (search + select + buttons) - list */
+.nek-outer .nek-search{
   min-width: 260px;
   display:flex;
   align-items:center;
@@ -107,9 +131,9 @@
   box-shadow: var(--shadow2);
 }
 
-.nek-search-ic{ opacity:.75; }
+.nek-outer .nek-search-ic{ opacity:.75; }
 
-.nek-search input{
+.nek-outer .nek-search input{
   border:none;
   outline:none;
   width:100%;
@@ -118,7 +142,7 @@
   font-size: 14px;
 }
 
-.nek-select{
+.nek-outer .nek-select{
   display:flex;
   align-items:center;
   gap: 10px;
@@ -130,7 +154,8 @@
   color: rgba(16,24,40,0.82);
   font-size: 13px;
 }
-.nek-select select{
+
+.nek-outer .nek-select select{
   border:none;
   outline:none;
   background:transparent;
@@ -139,6 +164,7 @@
   cursor:pointer;
 }
 
+/* Dugmad (koristi se i u modalu) */
 .nek-btn{
   display:inline-flex;
   align-items:center;
@@ -162,37 +188,59 @@
   background: rgba(255,255,255,0.72);
 }
 
-/* status */
-.nek-error{
+/* Status */
+.nek-outer .nek-error{
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(224, 102, 102, 0.18);
   border: 1px solid rgba(224, 102, 102, 0.35);
 }
-.nek-loading, .nek-empty{
+.nek-outer .nek-loading,
+.nek-outer .nek-empty{
   padding: 18px;
   opacity: .85;
 }
 
-/* SECTION */
-.nek-section{ padding-bottom: 26px; }
+/* =========================
+   SECTION (LISTA)
+   ========================= */
 
-/* LIST GRID */
-.nek-grid{
-  display:grid;
+.nek-outer .nek-section{
+  padding-bottom: 26px;
+}
+
+/* LIST GRID - centered, max 3 per row (SAMO LISTA) */
+.nek-outer .nek-grid{
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
+
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 0 12px;
+
+  justify-content: center;
+  align-content: start;
 }
 
 @media (max-width: 1100px){
-  .nek-grid{ grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 720px){
-  .nek-grid{ grid-template-columns: 1fr; }
+  .nek-outer .nek-grid{
+    width: min(920px, 100%);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.nek-card{
+@media (max-width: 720px){
+  .nek-outer .nek-grid{
+    width: min(520px, 100%);
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+}
+
+/* KARTICA - SAMO U GRIDU (DA NE DIRA TABELU) */
+.nek-outer .nek-grid .nek-card{
   display:block;
   border-radius: 22px;
   overflow:hidden;
@@ -201,35 +249,42 @@
   box-shadow: var(--shadow2);
   transition: transform .14s ease, background .14s ease, border-color .14s ease;
   text-decoration:none;
+
+  width: 100%;
+  max-width: 360px;
+  justify-self: center;
 }
 
-.nek-card:hover{
+.nek-outer .nek-grid .nek-card:hover{
   transform: translateY(-2px);
   background: rgba(255,255,255,0.74);
   border-color: rgba(15,23,42,0.16);
 }
 
-.nek-media{
+/* Media - SAMO U LISTI */
+.nek-outer .nek-grid .nek-media{
   position:relative;
-  height: 180px;
+  height: 200px;
   background: rgba(255,255,255,0.50);
 }
-.nek-media img{
+
+.nek-outer .nek-grid .nek-media img{
   width:100%;
   height:100%;
   object-fit:cover;
   display:block;
 }
-.nek-media-ph{
+
+.nek-outer .nek-grid .nek-media-ph{
   height:100%;
   display:grid;
   place-items:center;
   color: rgba(16,24,40,0.62);
   font-weight: 800;
 }
-.nek-media-ph.big{ height: 420px; border-radius: 22px; }
 
-.nek-pillrow{
+/* pills na slici - list */
+.nek-outer .nek-grid .nek-pillrow{
   position:absolute;
   left: 10px;
   bottom: 10px;
@@ -238,6 +293,7 @@
   flex-wrap: wrap;
 }
 
+/* pill je generičan (koristi se i na detaljima), ali nije vezan za tabelu */
 .nek-pill{
   display:inline-flex;
   align-items:center;
@@ -300,7 +356,11 @@
   padding-top: 12px;
 }
 
-/* DETAILS LAYOUT */
+/* =========================
+   DETAILS LAYOUT (pojedinačna nekretnina)
+   (ostaje kako je bilo, ne dira tabelu)
+   ========================= */
+
 .nek-details{
   display:grid;
   grid-template-columns: 1.4fr 1fr;
@@ -313,6 +373,7 @@
 }
 
 .nek-gallery{ }
+
 .nek-mainimg{
   border-radius: 22px;
   overflow:hidden;
@@ -451,7 +512,10 @@
 .nek-attr-k{ opacity:.75; font-weight: 800; font-size: 12px; }
 .nek-attr-v{ margin-top: 4px; font-weight: 900; color: rgba(16,24,40,0.90); }
 
-/* LIGHTBOX */
+/* =========================
+   LIGHTBOX
+   ========================= */
+
 .nek-lightbox{
   position: fixed;
   inset: 0;
@@ -520,7 +584,9 @@
   bottom: 12px;
   display:flex;
   gap: 10px;
-}/* =========================
+}
+
+/* =========================
    Slike u Create/Edit modalu
    ========================= */
 
@@ -576,7 +642,9 @@
 
 .nek-img-controls .nek-label{
   gap: 6px;
-}/* =========================
+}
+
+/* =========================
    FIX: modal scroll + dugmad uvek vidljiva
    ========================= */
 
@@ -597,7 +665,7 @@
   max-height: min(86vh, 760px);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* bitno: da body scroll radi u okviru modala */
+  overflow: hidden;
 }
 
 /* top ostaje fiksan gore */
@@ -609,7 +677,7 @@
 .nek-modal-body{
   flex: 1 1 auto;
   overflow: auto;
-  padding-bottom: 90px; /* prostor da sticky dugmad ne prekriju sadržaj */
+  padding-bottom: 90px;
 }
 
 /* dugmad ostaju uvek dole */
