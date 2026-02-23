@@ -53,8 +53,7 @@ export default function NavBar() {
       return [
         { to: "/", label: "Početna", icon: <FiHome /> },
         { to: "/ponuda-nekretnina", label: "Ponuda nekretnina", icon: <FiGrid /> },
-        // ako hoćeš da i gost može listu nekretnina da vidi:
-        { to: "/nekretnine", label: "Nekretnine", icon: <FiMap /> },
+      
         { to: "/login", label: "Login", icon: <FiLogIn /> },
       ];
     }
