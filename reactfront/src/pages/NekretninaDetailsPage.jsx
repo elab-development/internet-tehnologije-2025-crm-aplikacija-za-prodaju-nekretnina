@@ -20,12 +20,14 @@ import {
   FiKey,
 } from "react-icons/fi";
 
-/*
-  FX API (Frankfurter) radi na .app domenu (ne .dev).
-  Kurs koristimo samo na frontu: cena u bazi je EUR (BASE_CCY), a prikaz menjamo po izboru korisnika.
-*/
 const FX_API = "https://api.frankfurter.app";
 const BASE_CCY = "EUR";
+
+/*
+  Geocoding (adresa -> lat/lon) bez backend-a:
+  Koristimo OpenStreetMap Nominatim. Vraća koordinate, a mapu prikazujemo kao OSM iframe.
+*/
+const GEOCODE_API = "https://nominatim.openstreetmap.org/search";
 
 function normalizeImages(slke = []) {
   if (!Array.isArray(slke)) return [];
@@ -107,6 +109,11 @@ export default function NekretninaDetailsPage() {
   const [fxRate, setFxRate] = useState(1);
   const [fxLoading, setFxLoading] = useState(false);
   const [fxErr, setFxErr] = useState("");
+
+  // MAPA (lat/lon)
+  const [geo, setGeo] = useState(null); // { lat, lon, displayName }
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoErr, setGeoErr] = useState("");
 
   useEffect(() => {
     try {
@@ -222,6 +229,65 @@ export default function NekretninaDetailsPage() {
     };
   }, [currency]);
 
+  // Geocode kad se promeni adresa
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      const address = String(item?.adresa || "").trim();
+      if (!address) {
+        setGeo(null);
+        setGeoErr("");
+        return;
+      }
+
+      try {
+        setGeoLoading(true);
+        setGeoErr("");
+        setGeo(null);
+
+        const url = `${GEOCODE_API}?format=json&limit=1&q=${encodeURIComponent(address)}`;
+
+        const res = await fetch(url, {
+          headers: {
+            "Accept-Language": "sr,en;q=0.8",
+          },
+        });
+
+        if (!res.ok) throw new Error("Geocode failed");
+
+        const data = await res.json();
+        if (!alive) return;
+
+        const first = Array.isArray(data) ? data[0] : null;
+        const lat = first?.lat ? Number(first.lat) : null;
+        const lon = first?.lon ? Number(first.lon) : null;
+
+        if (!lat || !lon || Number.isNaN(lat) || Number.isNaN(lon)) {
+          setGeoErr("Nije moguće pronaći lokaciju za unetu adresu.");
+          setGeo(null);
+          return;
+        }
+
+        setGeo({
+          lat,
+          lon,
+          displayName: first?.display_name || address,
+        });
+      } catch {
+        if (!alive) return;
+        setGeoErr("Greška pri preuzimanju lokacije (mapa nije dostupna).");
+        setGeo(null);
+      } finally {
+        if (alive) setGeoLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [item?.adresa]);
+
   const attrsArray = useMemo(() => {
     const a = item?.atributi;
     if (!a) return [];
@@ -238,6 +304,23 @@ export default function NekretninaDetailsPage() {
   }, [priceEUR, currency, fxRate]);
 
   const subtitlePrice = fxLoading ? "Učitavam kurs..." : moneyFmt(convertedPrice, currency);
+
+  const osmEmbedUrl = useMemo(() => {
+    if (!geo?.lat || !geo?.lon) return "";
+    const lat = geo.lat;
+    const lon = geo.lon;
+
+    // mali bbox oko tacke da se lepo vidi pin
+    const d = 0.01;
+    const left = lon - d;
+    const right = lon + d;
+    const top = lat + d;
+    const bottom = lat - d;
+
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
+      `${left},${bottom},${right},${top}`
+    )}&layer=mapnik&marker=${encodeURIComponent(`${lat},${lon}`)}`;
+  }, [geo?.lat, geo?.lon]);
 
   return (
     <div className="nek-outer">
@@ -299,12 +382,7 @@ export default function NekretninaDetailsPage() {
         ) : (
           <div className="nek-details">
             <div className="nek-gallery">
-              <div
-                className="nek-mainimg"
-                onClick={() => images.length && setLightboxOpen(true)}
-                role="button"
-                tabIndex={0}
-              >
+              <div className="nek-mainimg" onClick={() => images.length && setLightboxOpen(true)} role="button" tabIndex={0}>
                 {images[activeIdx]?.url ? (
                   <img src={images[activeIdx].url} alt="Nekretnina" />
                 ) : (
@@ -335,11 +413,7 @@ export default function NekretninaDetailsPage() {
                 <div className="nek-panel-title">Detalji</div>
                 <div className="nek-mini">
                   <span className="nek-mini-pill subtle">ID: {item.id}</span>
-                  {images.length ? (
-                    <span className="nek-mini-pill">{images.length} slika</span>
-                  ) : (
-                    <span className="nek-mini-pill subtle">0 slika</span>
-                  )}
+                  {images.length ? <span className="nek-mini-pill">{images.length} slika</span> : <span className="nek-mini-pill subtle">0 slika</span>}
                 </div>
               </div>
 
@@ -390,6 +464,30 @@ export default function NekretninaDetailsPage() {
                 ) : (
                   <div className="nek-hint">Nema dodatnih atributa.</div>
                 )}
+
+                {/* MAPA */}
+                <div className="nek-mapwrap">
+                  <div className="nek-attrs-title" style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14 }}>
+                    <FiMapPin /> Lokacija
+                  </div>
+
+                  {geoLoading ? <div className="nek-hint">Učitavam lokaciju...</div> : null}
+                  {geoErr ? <div className="nek-hint">{geoErr}</div> : null}
+
+                  {!geoLoading && geo && osmEmbedUrl ? (
+                    <div className="nek-map">
+                      <iframe
+                        title="Mapa"
+                        src={osmEmbedUrl}
+                        style={{ width: "100%", height: 260, border: 0, borderRadius: 16 }}
+                        loading="lazy"
+                      />
+                      <div className="nek-hint" style={{ marginTop: 8 }}>
+                        {geo.displayName}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
