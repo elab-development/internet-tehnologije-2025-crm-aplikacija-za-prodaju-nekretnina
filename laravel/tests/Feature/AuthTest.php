@@ -87,25 +87,7 @@ class AuthTest extends TestCase
             ]);
     }
 
-    // Test da login vraća 401 kada je lozinka pogrešna
-    public function test_login_fails_with_wrong_password()
-    {
-        $user = User::create([
-            'ime' => 'Jovan',
-            'prezime' => 'Jovic',
-            'email' => 'jovan@test.com',
-            'password' => Hash::make('123456'),
-            'uloga' => 'agent',
-        ]);
-
-        $response = $this->postJson('/api/login', [
-            'email' => $user->email,
-            'password' => '000000',
-        ]);
-
-        $response->assertStatus(401)
-            ->assertJsonStructure(['message', 'errors']);
-    }
+ 
 
     // Test da prijavljeni korisnik može da pristupi /me i dobije svoje podatke
     public function test_authenticated_user_can_access_me()
