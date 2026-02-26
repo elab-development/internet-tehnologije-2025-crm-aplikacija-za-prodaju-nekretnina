@@ -2,10 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY reactfront/package.json reactfront/package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY reactfront .
+COPY . .
 
 EXPOSE 3000
 CMD ["npm", "start"]
