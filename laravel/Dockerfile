@@ -2,9 +2,13 @@ FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www
 
-RUN apk add --no-cache \
-    bash curl git zip unzip libzip-dev icu-dev oniguruma-dev mysql-client \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip intl opcache
+# Instaliranje system dependency-ja
+RUN apk update && apk upgrade \
+    && apk add --no-cache bash curl git zip unzip libzip-dev icu-dev oniguruma-dev libpng-dev libxml2-dev mysql-client autoconf g++ make
+
+# Instaliranje PHP ekstenzija
+RUN docker-php-ext-configure intl \
+    && docker-php-ext-install pdo pdo_mysql zip intl mbstring opcache bcmath
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
