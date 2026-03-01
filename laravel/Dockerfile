@@ -16,10 +16,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
 
 # 2) instaliraj dependencije u image (vendor ce postojati i posle restarta)
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+RUN composer install --no-interaction --prefer-dist --no-autoloader --no-dev --no-scripts
 
 # 3) onda kopiraj ostatak aplikacije
 COPY . .
+
+# 4) zatim konacno mapiranje i registriranje instaliranih paketa
+RUN composer dump-autoload --optimize --no-dev \
+    && php artisan package:discover --ansi \
+    && php artisan config:cache \
+    && php artisan route:cache
 
 # cache/storage folderi
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
