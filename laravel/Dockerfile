@@ -23,9 +23,7 @@ COPY . .
 
 # 4) zatim konacno mapiranje i registriranje instaliranih paketa
 RUN composer dump-autoload --optimize --no-dev \
-    && php artisan package:discover --ansi \
-    && php artisan config:cache \
-    && php artisan route:cache
+    && php artisan package:discover --ansi  
 
 # cache/storage folderi
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
