@@ -89,6 +89,10 @@ docker compose exec laravel php artisan storage:link
 
 docker compose exec laravel php artisan l5-swagger:generate
 
+### 8. Testiranje
+
+docker compose exec laravel php artisan test
+
 ---
 
 ## Zaustavljanje sistema
